@@ -8,6 +8,40 @@
         document.head.appendChild(link);
     }
 
+    // Function to convert model size string to integer number of parameters
+    function convertModelSizeToInt(sizeString) {
+        if (!sizeString) return 0;
+        
+        // Extract numeric value and unit (e.g., "235B params" -> "235" and "B")
+        const match = sizeString.match(/(\d+\.?\d*)([KMBTkmbt])?/);
+        if (!match) return 0;
+        
+        const value = parseFloat(match[1]);
+        const unit = (match[2] || '').toUpperCase();
+        
+        // Convert based on unit
+        let result;
+        switch (unit) {
+            case 'K':
+                result = value * 1000;
+                break;
+            case 'M':
+                result = value * 1000000;
+                break;
+            case 'B':
+                result = value * 1000000000;
+                break;
+            case 'T':
+                result = value * 1000000000000;
+                break;
+            default:
+                result = value;
+        }
+        
+        // Return as integer (round to nearest whole number)
+        return Math.round(result);
+    }
+
     // Function to extract model information from the page
     function extractModelInfo() {
         // Extract model name based on the exact HTML structure provided
@@ -19,6 +53,7 @@
         
         // Extract model size (number of parameters) based on the exact HTML structure provided
         let modelSize = '';
+        let modelSizeInt = 0;
         const modelSizeElements = document.querySelectorAll('.flex.flex-wrap.gap-x-1\\.5.gap-y-1 .inline-flex.h-6');
         if (modelSizeElements && modelSizeElements.length > 0) {
             modelSizeElements.forEach(element => {
@@ -27,12 +62,13 @@
                     const sizeDiv = element.querySelector('div.px-1\\.5');
                     if (sizeDiv) {
                         modelSize = sizeDiv.textContent.trim();
+                        modelSizeInt = convertModelSizeToInt(modelSize);
                     }
                 }
             });
         }
         
-        return { modelName, modelSize };
+        return { modelName, modelSize, modelSizeInt };
     }
     
     // Function to send model info to the side panel
@@ -82,7 +118,7 @@
                 const style = document.createElement('style');
                 style.textContent = `
                     .nebul-nav-link:hover {
-                        color: var(--secondary-color) !important;
+                        color: var(--pulse-red) !important;
                     }
                 `;
                 document.head.appendChild(style);

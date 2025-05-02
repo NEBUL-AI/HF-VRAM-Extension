@@ -5,15 +5,17 @@
   --steel-grey: #DDE3E8;
   --cloud-blue: #0DC8FF;
   --indigo-purple: #890AC8;
+  --light-grey: #F5F5F5;
+  --dark-grey: #333333;
 
   /* Functional colors */
-  --primary-color: var(--nebular-purple);
-  --secondary-color: var(--indigo-purple);
+  --primary-color: var(--dark-grey);
+  --secondary-color: var(--light-grey);
   --accent-color: var(--pulse-red);
-  --background-color: var(--steel-grey);
+  --background-color: var(--light-grey);
   --highlight-color: var(--cloud-blue);
 
   /* Text colors */
-  --text-on-light: var(--nebular-purple);
-  --text-on-dark: var(--steel-grey);
+  --text-on-light: var(--dark-grey);
+  --text-on-dark: var(--light-grey);
 } 

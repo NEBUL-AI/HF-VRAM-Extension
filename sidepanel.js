@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelNameElement = document.getElementById('model-name');
   const modelSizeElement = document.getElementById('model-size');
   
+  // Function to format large numbers with commas for readability
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  
   // Function to update the model info UI
   function updateModelInfoUI(modelInfo) {
     if (modelInfo) {
@@ -32,9 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
         modelNameElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }
       
-      // Update model size
+      // Update model size - show both human-readable and exact parameter count
       if (modelInfo.modelSize) {
-        modelSizeElement.innerHTML = `<span>${modelInfo.modelSize}</span>`;
+        let sizeDisplay = `<span>${modelInfo.modelSize}</span>`;
+        
+        // Add the integer representation if available
+        if (modelInfo.modelSizeInt && modelInfo.modelSizeInt > 0) {
+          sizeDisplay += ` <span class="text-gray-500">(${formatNumber(modelInfo.modelSizeInt)} parameters)</span>`;
+        }
+        
+        modelSizeElement.innerHTML = sizeDisplay;
       } else {
         modelSizeElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }

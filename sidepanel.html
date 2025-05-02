@@ -39,7 +39,7 @@
       }
       .model-info-header {
         font-size: 18px;
-        color: var(--secondary-color);
+        color: var(--primary-color);
         margin-top: 0;
         margin-bottom: 12px;
         font-weight: 600;
@@ -62,7 +62,94 @@
         color: #888;
         font-style: italic;
       }
+      .text-gray-500 {
+        color: #71717a;
+        font-size: 0.9em;
+      }
+      .custom-button-container {
+        margin-top: 16px;
+        background-color: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .custom-button {
+        background-color: white;
+        color: var(--primary-color);
+        border: 1px solid var(--light-grey);
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .custom-button:hover {
+        background-color: var(--secondary-color);
+      }
+      .mode-selection {
+        display: flex;
+        margin-bottom: 16px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid var(--light-grey);
+      }
+      
+      .mode-option {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
+        background-color: #f1f5f9;
+        transition: all 0.2s;
+      }
+      
+      .mode-option.selected {
+        background-color: white;
+        font-weight: 500;
+      }
+      
+      .input-section {
+        margin-bottom: 16px;
+      }
+      
+      .input-group {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .input-group label {
+        width: 140px;
+        font-weight: 500;
+      }
+      
+      .form-control {
+        flex: 1;
+        padding: 6px 8px;
+        border: 1px solid var(--light-grey);
+        border-radius: 4px;
+      }
+      
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+      }
+      
+      input[type="range"] {
+        margin-right: 10px;
+      }
+      
+      .hidden {
+        display: none !important;
+      }
+      
+      .visible {
+        display: block !important;
+      }
     </style>
+    <!-- Load JavaScript files -->
+    <script src="sidepanel.js"></script>
+    <script src="mode-switcher.js"></script>
   </head>
   <body>
     <div class="header">
@@ -92,6 +179,159 @@
       </div>
     </div>
     
-    <script src="sidepanel.js"></script>
+    <div class="custom-button-container">
+      <h2 class="model-info-header">Calculate necessary VRAM</h2>
+      
+      <div class="mode-selection">
+        <div class="mode-option selected" data-mode="inference">Inference</div>
+        <div class="mode-option" data-mode="fine-tuning">Fine-tuning</div>
+      </div>
+      
+      <div class="input-section">
+        <div id="inference-fields" class="visible">
+          <div class="input-group">
+            <label for="precision">Precision:</label>
+            <select id="precision" class="form-control">
+              <option value="fp32">FP32</option>
+              <option value="fp16">FP16</option>
+              <option value="q8">Q8</option>
+              <option value="q4">Q4</option>
+              <option value="q2">Q2</option>
+              <option value="q1">Q1</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="gpu">GPU:</label>
+            <select id="gpu" class="form-control">
+              <option value="rtx-4090">RTX 4090</option>
+              <option value="l4">L4</option>
+              <option value="l40s">L40S</option>
+              <option value="a100">A100</option>
+              <option value="h200">H200</option>
+              <option value="b200">B200</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="number-of-gpus">Number of GPUs:</label>
+            <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
+          </div>
+          
+          <div class="input-group">
+            <label for="batch-size">Batch Size:</label>
+            <input type="number" id="batch-size" class="form-control" value="32" min="1" max="64">
+          </div>
+          
+          <div class="input-group">
+            <label for="sequence-length">Sequence Length:</label>
+            <input type="number" id="sequence-length" class="form-control" value="2048" min="1" max="131072">
+          </div>
+          
+          <div class="input-group">
+            <label for="concurrent-requests">Concurrent Requests:</label>
+            <input type="number" id="concurrent-requests" class="form-control" value="1" min="1" max="100">
+          </div>
+        </div>
+        
+        <div id="fine-tuning-fields" class="hidden">
+          
+          <div class="input-group">
+            <label for="fine-tuning-method">Fine-tuning Method:</label>
+            <select id="fine-tuning-method" class="form-control">
+              <option value="full">Full</option>
+              <option value="lora">LoRA</option>
+              <option value="qlora">QLoRA</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="gpu">GPU:</label>
+            <select id="gpu" class="form-control">
+              <option value="rtx-4090">RTX 4090</option>
+              <option value="l4">L4</option>
+              <option value="l40s">L40S</option>
+              <option value="a100">A100</option>
+              <option value="h200">H200</option>
+              <option value="b200">B200</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="number-of-gpus">Number of GPUs:</label>
+            <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
+          </div>
+
+          <div class="input-group">
+            <label for="batch-size">Batch Size:</label>
+            <input type="number" id="batch-size" class="form-control" value="32" min="1" max="64">
+          </div>
+          
+          <div class="input-group">
+            <label for="sequence-length">Sequence Length:</label>
+            <input type="number" id="sequence-length" class="form-control" value="2048" min="1" max="131072">
+          </div>
+<!--           
+          <div class="input-group">
+            <label for="lora-rank">LoRA Rank:</label>
+            <input type="number" id="lora-rank" class="form-control" value="8" min="1" max="64">
+          </div> 
+          
+          <div class="input-group">
+            <label for="dataset-size">Dataset Size (MB):</label>
+            <input type="range" id="dataset-size" class="form-control" min="10" max="5000" value="100" step="10">
+            <span id="dataset-size-value">100</span>
+          </div>
+          
+          <div class="input-group">
+            <label for="use-gradient-checkpointing">Gradient Checkpointing:</label>
+            <input type="checkbox" id="use-gradient-checkpointing" class="form-control" checked>
+          </div>-->
+
+
+        </div>
+      </div>
+      
+      <button id="custom-button" class="custom-button">Calculate VRAM</button>
+    </div>
+    
+    <script>
+      // Script to initialize the slider values
+      document.addEventListener('DOMContentLoaded', function() {
+        // Add click event listener for the custom button
+        document.getElementById('custom-button').addEventListener('click', function() {
+          this.textContent = 'Button clicked!';
+          this.style.backgroundColor = 'var(--secondary-color)';
+          
+          // Reset after 1 second
+          setTimeout(() => {
+            this.textContent = 'Calculate VRAM';
+            this.style.backgroundColor = '';
+          }, 1000);
+        });
+
+        // Update the sequence length display value
+        const sequenceLengthSlider = document.getElementById('sequence-length');
+        const sequenceLengthValue = document.getElementById('sequence-length-value');
+        
+        if (sequenceLengthSlider && sequenceLengthValue) {
+          sequenceLengthSlider.addEventListener('input', function() {
+            sequenceLengthValue.textContent = this.value;
+          });
+        }
+        
+        // Update the dataset size display value
+        const datasetSizeSlider = document.getElementById('dataset-size');
+        const datasetSizeValue = document.getElementById('dataset-size-value');
+        
+        if (datasetSizeSlider && datasetSizeValue) {
+          datasetSizeSlider.addEventListener('input', function() {
+            datasetSizeValue.textContent = this.value;
+          });
+        }
+        
+        console.log('Slider initialization complete');
+      });
+    </script>
   </body>
 </html>
