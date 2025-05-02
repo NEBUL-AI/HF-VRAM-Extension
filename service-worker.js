@@ -31,3 +31,36 @@ function setupContextMenu() {
     // Make sure the side panel is open.
     chrome.sidePanel.open({ tabId: tab.id });
   });
+
+  // Listen for tab updates to inject our script if needed
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && 
+        (tab.url.includes('huggingface.co') || tab.url.includes('hf.co'))) {
+      
+      // Inject our script to ensure it runs
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content-script.js']
+      })
+      .catch(err => console.error('Error injecting content script:', err));
+    }
+  });
+
+  // Listen for messages from content script
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'openSidePanel') {
+      // Open the side panel for the tab that sent the message
+      chrome.sidePanel.open({ tabId: sender.tab.id })
+        .then(() => {
+          console.log('Side panel opened successfully');
+          sendResponse({ success: true });
+        })
+        .catch(error => {
+          console.error('Error opening side panel:', error);
+          sendResponse({ success: false, error: error.message });
+        });
+      
+      // Return true to indicate we'll respond asynchronously
+      return true;
+    }
+  });

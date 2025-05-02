@@ -1,0 +1,90 @@
+// Content script to add "Nebul" option to Hugging Face navbar
+(function() {
+    // Function to add the Nebul option
+    function addNebulToNavbar() {
+        // Look for the navbar <ul> that contains the navigation items
+        const navbarUl = document.querySelector('nav[aria-label="Main"] ul');
+        
+        if (navbarUl) {
+            // Find the pricing <li> element
+            const navItems = navbarUl.querySelectorAll('li');
+            let pricingItem = null;
+            
+            for (let i = 0; i < navItems.length; i++) {
+                const item = navItems[i];
+                const link = item.querySelector('a');
+                if (link && link.textContent === 'Pricing') {
+                    pricingItem = item;
+                    break;
+                }
+            }
+            if (pricingItem && !document.querySelector('.nebul-nav-item')) {
+                // Create new Nebul <li> element
+                const nebulItem = document.createElement('li');
+                nebulItem.className = 'hover:text-purple-700 nebul-nav-item';
+                
+                // Create a styled link to match the Hugging Face navbar style
+                nebulItem.innerHTML = `
+                    <a class="group flex items-center px-2 py-0.5 dark:text-gray-300 dark:hover:text-gray-100 cursor-pointer" href="#">
+                        <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="mr-1.5 w-4 h-4" alt="Nebul">
+                        Nebul
+                    </a>
+                `;
+                
+                // Add click event listener to open the side panel
+                nebulItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Send message to background service worker to open the side panel
+                    chrome.runtime.sendMessage({ action: 'openSidePanel' });
+                    console.log('Requested to open Nebul side panel');
+                });
+                
+                // Insert the Nebul item after the Pricing item
+                pricingItem.after(nebulItem);
+                console.log('Nebul option added to navbar');
+            }
+        }
+    }
+    
+    // Function to check periodically if the navbar exists
+    function checkAndAddNebul() {
+        if (document.querySelector('nav[aria-label="Main"] ul')) {
+            addNebulToNavbar();
+        } else {
+            // Try again if navbar isn't loaded yet
+            setTimeout(checkAndAddNebul, 500);
+        }
+    }
+    
+    // Check if URL contains huggingface.co or hf.co
+    if (window.location.hostname.includes('huggingface.co') || 
+        window.location.hostname.includes('hf.co')) {
+        
+        // Wait for page to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAndAddNebul);
+        } else {
+            checkAndAddNebul();
+        }
+        
+        // Also observe DOM changes to handle SPA navigation
+        const observer = new MutationObserver(function(mutations) {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length) {
+                    // Don't run too frequently - debounce using a timeout
+                    if (!window.nebulObserverTimeout) {
+                        window.nebulObserverTimeout = setTimeout(() => {
+                            checkAndAddNebul();
+                            window.nebulObserverTimeout = null;
+                        }, 500);
+                    }
+                }
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+})(); 

@@ -16,6 +16,35 @@
     "permissions": [
         "sidePanel",
         "contextMenus",
-        "storage"
+        "storage",
+        "activeTab",
+        "scripting",
+        "tabs"
+    ],
+    "host_permissions": [
+        "*://*.huggingface.co/*",
+        "*://*.hf.co/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.huggingface.co/*",
+                "*://*.hf.co/*"
+            ],
+            "js": [
+                "content-script.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "images/icon-128.png"
+            ],
+            "matches": [
+                "*://*.huggingface.co/*",
+                "*://*.hf.co/*"
+            ]
+        }
     ]
 }
