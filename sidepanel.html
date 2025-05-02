@@ -29,6 +29,38 @@
         border-radius: 8px;
         padding: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
+      }
+      .model-info {
+        background-color: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .model-info-header {
+        font-size: 18px;
+        color: var(--secondary-color);
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+      .info-item {
+        display: flex;
+        margin-bottom: 8px;
+      }
+      .info-label {
+        width: 100px;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+      .info-value {
+        flex: 1;
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+      .placeholder-text {
+        color: #888;
+        font-style: italic;
       }
     </style>
   </head>
@@ -41,6 +73,25 @@
       <p>Welcome to Nebul GenAI - your AI assistant for Hugging Face.</p>
       <p>This panel will help you interact with models and datasets on Hugging Face.</p>
     </div>
+    
+    <div class="model-info">
+      <h2 class="model-info-header">Model Information</h2>
+      
+      <div class="info-item">
+        <div class="info-label">Name:</div>
+        <div id="model-name" class="info-value">
+          <span class="placeholder-text">Navigate to a model page...</span>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <div class="info-label">Size:</div>
+        <div id="model-size" class="info-value">
+          <span class="placeholder-text">Navigate to a model page...</span>
+        </div>
+      </div>
+    </div>
+    
     <script src="sidepanel.js"></script>
   </body>
 </html>

@@ -18,33 +18,46 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Nebul side panel loaded');
   
-  // You can add event listeners for any interactive elements in the side panel here
+  // DOM elements for model info
+  const modelNameElement = document.getElementById('model-name');
+  const modelSizeElement = document.getElementById('model-size');
   
-  // Example: Send a message to the current tab/page
-  function sendMessageToPage(message) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, message)
-          .then(response => {
-            console.log('Response from page:', response);
-          })
-          .catch(error => {
-            console.error('Error sending message to page:', error);
-          });
+  // Function to update the model info UI
+  function updateModelInfoUI(modelInfo) {
+    if (modelInfo) {
+      // Update model name
+      if (modelInfo.modelName) {
+        modelNameElement.innerHTML = `<span>${modelInfo.modelName}</span>`;
+      } else {
+        modelNameElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }
-    });
+      
+      // Update model size
+      if (modelInfo.modelSize) {
+        modelSizeElement.innerHTML = `<span>${modelInfo.modelSize}</span>`;
+      } else {
+        modelSizeElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
+      }
+    }
   }
   
-  // Example: Listen for messages from the content script or service worker
+  // Check if there's already model info in storage
+  chrome.storage.session.get(['modelInfo'], (result) => {
+    if (result.modelInfo) {
+      updateModelInfoUI(result.modelInfo);
+    }
+  });
+  
+  // Listen for messages from the service worker
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Message received in side panel:', message);
     
-    // Add your message handling logic here
+    // Handle model info updates
+    if (message.action === 'modelInfoUpdated') {
+      updateModelInfoUI(message.data);
+      sendResponse({ received: true });
+    }
     
-    // Example response
-    sendResponse({ received: true });
     return true; // Keep the messaging channel open for async responses
   });
-  
-  // You can add functions to interact with Hugging Face API or other services here
 });

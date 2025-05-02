@@ -48,6 +48,7 @@ function setupContextMenu() {
 
   // Listen for messages from content script
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // Handle opening the side panel
     if (message.action === 'openSidePanel') {
       // Open the side panel for the tab that sent the message
       chrome.sidePanel.open({ tabId: sender.tab.id })
@@ -61,6 +62,27 @@ function setupContextMenu() {
         });
       
       // Return true to indicate we'll respond asynchronously
+      return true;
+    }
+    
+    // Handle model info updates
+    if (message.action === 'updateModelInfo') {
+      // Store the model info in session storage for the sidepanel to access
+      chrome.storage.session.set({ modelInfo: message.data });
+      
+      // If sender is a tab and the sidepanel is open, forward the message to the sidepanel
+      if (sender.tab) {
+        chrome.runtime.sendMessage({
+          action: 'modelInfoUpdated',
+          data: message.data,
+          sourceTabId: sender.tab.id
+        }).catch(err => {
+          // This error is expected if sidepanel is not open yet, so we just log it
+          console.log('Could not send to sidepanel directly, data is stored in session storage');
+        });
+      }
+      
+      sendResponse({ success: true });
       return true;
     }
   });

@@ -8,6 +8,45 @@
         document.head.appendChild(link);
     }
 
+    // Function to extract model information from the page
+    function extractModelInfo() {
+        // Extract model name based on the exact HTML structure provided
+        let modelName = '';
+        const modelNameElement = document.querySelector('h1 div.max-w-full a.font-mono.font-semibold');
+        if (modelNameElement) {
+            modelName = modelNameElement.textContent.trim();
+        }
+        
+        // Extract model size (number of parameters) based on the exact HTML structure provided
+        let modelSize = '';
+        const modelSizeElements = document.querySelectorAll('.flex.flex-wrap.gap-x-1\\.5.gap-y-1 .inline-flex.h-6');
+        if (modelSizeElements && modelSizeElements.length > 0) {
+            modelSizeElements.forEach(element => {
+                const labelDiv = element.querySelector('.border-r.px-2.text-gray-500');
+                if (labelDiv && labelDiv.textContent.trim() === 'Model size') {
+                    const sizeDiv = element.querySelector('div.px-1\\.5');
+                    if (sizeDiv) {
+                        modelSize = sizeDiv.textContent.trim();
+                    }
+                }
+            });
+        }
+        
+        return { modelName, modelSize };
+    }
+    
+    // Function to send model info to the side panel
+    function sendModelInfoToSidePanel() {
+        const modelInfo = extractModelInfo();
+        if (modelInfo.modelName || modelInfo.modelSize) {
+            chrome.runtime.sendMessage({ 
+                action: 'updateModelInfo', 
+                data: modelInfo 
+            });
+            console.log('Sent model info to side panel:', modelInfo);
+        }
+    }
+
     // Function to add the Nebul option
     function addNebulToNavbar() {
         // Look for the navbar <ul> that contains the navigation items
@@ -68,6 +107,8 @@
         if (document.querySelector('nav[aria-label="Main"] ul')) {
             injectColorsCSS();
             addNebulToNavbar();
+            // Extract and send model info after adding Nebul to navbar
+            sendModelInfoToSidePanel();
         } else {
             // Try again if navbar isn't loaded yet
             setTimeout(checkAndAddNebul, 500);
@@ -85,7 +126,7 @@
             checkAndAddNebul();
         }
         
-        // Also observe DOM changes to handle SPA navigation
+        // Also observe DOM changes to handle SPA navigation and update model info
         const observer = new MutationObserver(function(mutations) {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length) {
@@ -93,6 +134,8 @@
                     if (!window.nebulObserverTimeout) {
                         window.nebulObserverTimeout = setTimeout(() => {
                             checkAndAddNebul();
+                            // Also check and send model info separately in case the page content updates
+                            sendModelInfoToSidePanel();
                             window.nebulObserverTimeout = null;
                         }, 500);
                     }
