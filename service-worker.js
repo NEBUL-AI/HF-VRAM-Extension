@@ -12,77 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function setupContextMenu() {
-    chrome.contextMenus.create({
-      id: 'define-word',
-      title: 'Define',
-      contexts: ['selection']
-    });
+// Listen for tab updates to inject our script if needed
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && 
+      (tab.url.includes('huggingface.co') || tab.url.includes('hf.co'))) {
+    
+    // Inject our script to ensure it runs
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['content-script.js']
+    })
+    .catch(err => console.error('Error injecting content script:', err));
+  }
+});
+
+// Listen for messages from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle opening the side panel
+  if (message.action === 'openSidePanel') {
+    // Open the side panel for the tab that sent the message
+    chrome.sidePanel.open({ tabId: sender.tab.id })
+      .then(() => {
+        console.log('Side panel opened successfully');
+        sendResponse({ success: true });
+      })
+      .catch(error => {
+        console.error('Error opening side panel:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    
+    // Return true to indicate we'll respond asynchronously
+    return true;
   }
   
-  chrome.runtime.onInstalled.addListener(() => {
-    setupContextMenu();
-  });
-  
-  chrome.contextMenus.onClicked.addListener((data, tab) => {
-    // Store the last word in chrome.storage.session.
-    chrome.storage.session.set({ lastWord: data.selectionText });
-  
-    // Make sure the side panel is open.
-    chrome.sidePanel.open({ tabId: tab.id });
-  });
-
-  // Listen for tab updates to inject our script if needed
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && 
-        (tab.url.includes('huggingface.co') || tab.url.includes('hf.co'))) {
-      
-      // Inject our script to ensure it runs
-      chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['content-script.js']
-      })
-      .catch(err => console.error('Error injecting content script:', err));
-    }
-  });
-
-  // Listen for messages from content script
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // Handle opening the side panel
-    if (message.action === 'openSidePanel') {
-      // Open the side panel for the tab that sent the message
-      chrome.sidePanel.open({ tabId: sender.tab.id })
-        .then(() => {
-          console.log('Side panel opened successfully');
-          sendResponse({ success: true });
-        })
-        .catch(error => {
-          console.error('Error opening side panel:', error);
-          sendResponse({ success: false, error: error.message });
-        });
-      
-      // Return true to indicate we'll respond asynchronously
-      return true;
+  // Handle model info updates
+  if (message.action === 'updateModelInfo') {
+    // Store the model info in session storage for the sidepanel to access
+    chrome.storage.session.set({ modelInfo: message.data });
+    
+    // If sender is a tab and the sidepanel is open, forward the message to the sidepanel
+    if (sender.tab) {
+      chrome.runtime.sendMessage({
+        action: 'modelInfoUpdated',
+        data: message.data,
+        sourceTabId: sender.tab.id
+      }).catch(err => {
+        // This error is expected if sidepanel is not open yet, so we just log it
+        console.log('Could not send to sidepanel directly, data is stored in session storage');
+      });
     }
     
-    // Handle model info updates
-    if (message.action === 'updateModelInfo') {
-      // Store the model info in session storage for the sidepanel to access
-      chrome.storage.session.set({ modelInfo: message.data });
-      
-      // If sender is a tab and the sidepanel is open, forward the message to the sidepanel
-      if (sender.tab) {
-        chrome.runtime.sendMessage({
-          action: 'modelInfoUpdated',
-          data: message.data,
-          sourceTabId: sender.tab.id
-        }).catch(err => {
-          // This error is expected if sidepanel is not open yet, so we just log it
-          console.log('Could not send to sidepanel directly, data is stored in session storage');
-        });
-      }
-      
-      sendResponse({ success: true });
-      return true;
-    }
-  });
+    sendResponse({ success: true });
+    return true;
+  }
+});
