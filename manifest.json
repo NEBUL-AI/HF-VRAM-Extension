@@ -39,7 +39,8 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "images/icon-128.png"
+                "images/icon-128.png",
+                "colors.css"
             ],
             "matches": [
                 "*://*.huggingface.co/*",

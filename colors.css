@@ -1,0 +1,19 @@
+:root {
+  /* Brand Colors */
+  --nebular-purple: #230023;
+  --pulse-red: #FE2200;
+  --steel-grey: #DDE3E8;
+  --cloud-blue: #0DC8FF;
+  --indigo-purple: #890AC8;
+
+  /* Functional colors */
+  --primary-color: var(--nebular-purple);
+  --secondary-color: var(--indigo-purple);
+  --accent-color: var(--pulse-red);
+  --background-color: var(--steel-grey);
+  --highlight-color: var(--cloud-blue);
+
+  /* Text colors */
+  --text-on-light: var(--nebular-purple);
+  --text-on-dark: var(--steel-grey);
+} 

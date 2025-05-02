@@ -1,5 +1,13 @@
 // Content script to add "Nebul" option to Hugging Face navbar
 (function() {
+    // Function to inject our colors CSS
+    function injectColorsCSS() {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = chrome.runtime.getURL('colors.css');
+        document.head.appendChild(link);
+    }
+
     // Function to add the Nebul option
     function addNebulToNavbar() {
         // Look for the navbar <ul> that contains the navigation items
@@ -21,15 +29,24 @@
             if (pricingItem && !document.querySelector('.nebul-nav-item')) {
                 // Create new Nebul <li> element
                 const nebulItem = document.createElement('li');
-                nebulItem.className = 'hover:text-purple-700 nebul-nav-item';
+                nebulItem.className = 'nebul-nav-item';
                 
                 // Create a styled link to match the Hugging Face navbar style
                 nebulItem.innerHTML = `
-                    <a class="group flex items-center px-2 py-0.5 dark:text-gray-300 dark:hover:text-gray-100 cursor-pointer" href="#">
+                    <a class="group flex items-center px-2 py-0.5 dark:text-gray-300 dark:hover:text-gray-100 cursor-pointer nebul-nav-link" href="#">
                         <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="mr-1.5 w-4 h-4" alt="Nebul">
                         Nebul
                     </a>
                 `;
+
+                // Add our custom style for the hover effect
+                const style = document.createElement('style');
+                style.textContent = `
+                    .nebul-nav-link:hover {
+                        color: var(--secondary-color) !important;
+                    }
+                `;
+                document.head.appendChild(style);
                 
                 // Add click event listener to open the side panel
                 nebulItem.addEventListener('click', (e) => {
@@ -49,6 +66,7 @@
     // Function to check periodically if the navbar exists
     function checkAndAddNebul() {
         if (document.querySelector('nav[aria-label="Main"] ul')) {
+            injectColorsCSS();
             addNebulToNavbar();
         } else {
             // Try again if navbar isn't loaded yet
