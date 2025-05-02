@@ -22,9 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelNameElement = document.getElementById('model-name');
   const modelSizeElement = document.getElementById('model-size');
   
-  // DOM elements for calculation
+  // DOM elements for calculation - Inference
   const calculateButton = document.getElementById('calculate-button');
   const resultsSection = document.getElementById('calc-results');
+  
+  // DOM elements for calculation - Fine-tuning
+  const ftCalculateButton = document.getElementById('ft-calculate-button');
   
   // Function to format large numbers with commas for readability
   function formatNumber(num) {
@@ -77,9 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return true; // Keep the messaging channel open for async responses
   });
   
-  // Add click handler for the calculate button
+  // Add click handler for the calculate button (inference)
   calculateButton.addEventListener('click', () => {
-    performCalculation();
+    performInferenceCalculation();
+  });
+  
+  // Add click handler for the fine-tuning calculate button
+  ftCalculateButton.addEventListener('click', () => {
+    performFinetuningCalculation();
   });
   
   // Add click handler for the details toggle
@@ -92,9 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleIcon.textContent = detailsContent.classList.contains('expanded') ? '▲' : '▼';
   });
   
-  // Function to gather input values and trigger calculation
-  function performCalculation() {
-    // Get model parameter count from model info
+  // Function to extract parameter count in billions from model info
+  function extractParameterCount() {
     let paramsBillions = 0;
     const modelSizeText = modelSizeElement.textContent;
     
@@ -118,6 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
       paramsBillions = 7; // Default to 7B parameters
     }
     
+    return paramsBillions;
+  }
+  
+  // Function to gather input values and trigger inference calculation
+  function performInferenceCalculation() {
+    // Get model parameter count from model info
+    const paramsBillions = extractParameterCount();
+    
     // Get input values
     const precision = document.getElementById('precision').value.toUpperCase();
     const gpuName = document.getElementById('gpu').value;
@@ -127,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const concurrentRequests = parseInt(document.getElementById('concurrent-requests').value, 10);
     const isReasoning = true; // Default to reasoning model for LLMs
     
-    console.log('Calculating VRAM for:', {
+    console.log('Calculating inference VRAM for:', {
       paramsBillions,
       precision,
       gpuName,
@@ -159,8 +174,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Function to display calculation results
+  // Function to gather input values and trigger fine-tuning calculation
+  function performFinetuningCalculation() {
+    // Get model parameter count from model info
+    const paramsBillions = extractParameterCount();
+    
+    // Get input values
+    const finetuningMethod = document.getElementById('fine-tuning-method').value;
+    const gpuName = document.getElementById('ft-gpu').value;
+    const numGpus = parseInt(document.getElementById('ft-number-of-gpus').value, 10);
+    const batchSize = parseInt(document.getElementById('ft-batch-size').value, 10);
+    const seqLength = parseInt(document.getElementById('ft-sequence-length').value, 10);
+    const gradAccumSteps = parseInt(document.getElementById('grad-accum-steps').value, 10);
+    
+    console.log('Calculating fine-tuning VRAM for:', {
+      paramsBillions,
+      finetuningMethod,
+      gpuName,
+      numGpus,
+      batchSize,
+      seqLength,
+      gradAccumSteps
+    });
+    
+    // Perform the calculation
+    try {
+      // Check if function is available
+      if (typeof calculateFinetuningRequirements !== 'function') {
+        console.log('calculateFinetuningRequirements function not found. Attempting to load it dynamically.');
+        
+        // Try to load it from the FinetuneCalculator namespace
+        if (typeof FinetuneCalculator !== 'undefined' && 
+            typeof FinetuneCalculator.calculateFinetuningRequirements === 'function') {
+          window.calculateFinetuningRequirements = FinetuneCalculator.calculateFinetuningRequirements;
+          console.log('Successfully loaded from FinetuneCalculator namespace.');
+        } else {
+          throw new Error('Could not load the fine-tuning calculator. Please refresh the page and try again.');
+        }
+      }
+      
+      const result = calculateFinetuningRequirements(
+        paramsBillions,
+        finetuningMethod,
+        gpuName,
+        numGpus,
+        batchSize,
+        seqLength,
+        gradAccumSteps
+      );
+      
+      // Display the results
+      displayFinetuningResults(result);
+    } catch (error) {
+      console.error('Error calculating fine-tuning VRAM requirements:', error);
+      alert(error.message || 'Error calculating fine-tuning VRAM requirements. Please check the console for details.');
+    }
+  }
+  
+  // Function to display inference calculation results
   function displayResults(result) {
+    displayCalculationResults(result, false);
+  }
+  
+  // Function to display fine-tuning calculation results
+  function displayFinetuningResults(result) {
+    displayCalculationResults(result, true);
+  }
+  
+  // Common function to display calculation results
+  function displayCalculationResults(result, isFinetuning) {
     // Show the results section
     resultsSection.classList.remove('hidden');
     
@@ -171,13 +253,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update main results
     document.getElementById('will-it-fit').textContent = result.will_it_fit ? 'Yes' : 'No';
     document.getElementById('needed-vram').textContent = `${result.needed_vram} GB`;
-    document.getElementById('total-kv-cache').textContent = `${result.total_kv_cache} GB`;
+    
+    // Set KV Cache (different display for inference vs fine-tuning)
+    const kvCacheElement = document.getElementById('total-kv-cache');
+    if (isFinetuning) {
+      if (result.details.optimizer_states) {
+        kvCacheElement.parentElement.querySelector('.result-label').textContent = 'Optimizer States:';
+        kvCacheElement.textContent = `${result.details.optimizer_states} GB`;
+      } else {
+        kvCacheElement.parentElement.querySelector('.result-label').textContent = 'KV Cache:';
+        kvCacheElement.textContent = `${result.details.kv_cache} GB`;
+      }
+    } else {
+      kvCacheElement.parentElement.querySelector('.result-label').textContent = 'KV Cache:';
+      kvCacheElement.textContent = `${result.total_kv_cache} GB`;
+    }
     
     // Update details
     const details = result.details;
     const detailsContent = document.getElementById('details-content');
     
-    detailsContent.innerHTML = `
+    let detailsHtml = `
       <div class="detail-item">
         <div class="detail-label">Model Weights:</div>
         <div class="detail-value">${details.model_weights} GB</div>
@@ -190,14 +286,32 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-label">KV Cache:</div>
         <div class="detail-value">${details.kv_cache} GB</div>
       </div>
-      <div class="detail-item">
-        <div class="detail-label">Base VRAM:</div>
-        <div class="detail-value">${details.base_vram} GB</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">Overhead Factor:</div>
-        <div class="detail-value">${details.overhead_factor}×</div>
-      </div>
+    `;
+    
+    // Add fine-tuning specific details
+    if (isFinetuning) {
+      detailsHtml += `
+        <div class="detail-item">
+          <div class="detail-label">Optimizer States:</div>
+          <div class="detail-value">${details.optimizer_states} GB</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Gradient Checkpointing:</div>
+          <div class="detail-value">${details.gradient_checkpointing ? 'Enabled' : 'Disabled'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Effective Batch Size:</div>
+          <div class="detail-value">${details.effective_batch_size}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Method:</div>
+          <div class="detail-value">${details.method_description}</div>
+        </div>
+      `;
+    }
+    
+    // Add common details
+    detailsHtml += `
       <div class="detail-item">
         <div class="detail-label">Total VRAM:</div>
         <div class="detail-value">${details.total_vram} GB</div>
@@ -211,6 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="detail-value">${details.vram_usage_percent}%</div>
       </div>
     `;
+    
+    detailsContent.innerHTML = detailsHtml;
     
     // Display suggestions if available
     const suggestionsSection = document.getElementById('suggestions-section');
@@ -235,6 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
             break;
           case 'increase_gpus':
             suggestionText = `Use ${suggestion.num_gpus} GPUs (${suggestion.needed_vram} GB)`;
+            break;
+          case 'change_method':
+            suggestionText = `Use ${suggestion.method} method (${suggestion.needed_vram} GB)`;
+            break;
+          case 'increase_grad_accum':
+            suggestionText = `Increase gradient accumulation steps to ${suggestion.grad_accum_steps} (${suggestion.needed_vram} GB)`;
             break;
         }
         

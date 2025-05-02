@@ -267,6 +267,28 @@
     </style>
     <!-- Load JavaScript files -->
     <script src="inference-calculator.js"></script>
+    <script src="finetune-calculator.js"></script>
+    <script>
+      // Ensure calculator functions are available
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if inference calculator is loaded
+        if (typeof calculateVramRequirements !== 'function') {
+          console.error('Inference calculator not loaded properly');
+        } else {
+          console.log('Inference calculator loaded successfully');
+        }
+        
+        // Check if fine-tuning calculator is loaded
+        if (typeof FinetuneCalculator === 'undefined' || 
+            typeof FinetuneCalculator.calculateFinetuningRequirements !== 'function') {
+          console.error('Fine-tuning calculator not loaded properly');
+        } else {
+          // Ensure the global function is assigned
+          window.calculateFinetuningRequirements = FinetuneCalculator.calculateFinetuningRequirements;
+          console.log('Fine-tuning calculator loaded successfully');
+        }
+      });
+    </script>
     <script src="sidepanel.js"></script>
     <script src="mode-switcher.js"></script>
   </head>
@@ -371,8 +393,8 @@
           </div>
           
           <div class="input-group">
-            <label for="gpu">GPU:</label>
-            <select id="gpu" class="form-control">
+            <label for="ft-gpu">GPU:</label>
+            <select id="ft-gpu" class="form-control">
               <option value="rtx-4090">RTX 4090</option>
               <option value="l4">L4</option>
               <option value="l40s">L40S</option>
@@ -383,37 +405,28 @@
           </div>
 
           <div class="input-group">
-            <label for="number-of-gpus">Number of GPUs:</label>
-            <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
+            <label for="ft-number-of-gpus">Number of GPUs:</label>
+            <input type="number" id="ft-number-of-gpus" class="form-control" value="1" min="1" max="64">
           </div>
 
           <div class="input-group">
-            <label for="batch-size">Batch Size:</label>
-            <input type="number" id="batch-size" class="form-control" value="32" min="1" max="64">
+            <label for="ft-batch-size">Batch Size:</label>
+            <input type="number" id="ft-batch-size" class="form-control" value="8" min="1" max="64">
           </div>
           
           <div class="input-group">
-            <label for="sequence-length">Sequence Length:</label>
-            <input type="number" id="sequence-length" class="form-control" value="2048" min="1" max="131072">
-          </div>
-<!--           
-          <div class="input-group">
-            <label for="lora-rank">LoRA Rank:</label>
-            <input type="number" id="lora-rank" class="form-control" value="8" min="1" max="64">
-          </div> 
-          
-          <div class="input-group">
-            <label for="dataset-size">Dataset Size (MB):</label>
-            <input type="range" id="dataset-size" class="form-control" min="10" max="5000" value="100" step="10">
-            <span id="dataset-size-value">100</span>
+            <label for="ft-sequence-length">Sequence Length:</label>
+            <input type="number" id="ft-sequence-length" class="form-control" value="2048" min="1" max="131072">
           </div>
           
           <div class="input-group">
-            <label for="use-gradient-checkpointing">Gradient Checkpointing:</label>
-            <input type="checkbox" id="use-gradient-checkpointing" class="form-control" checked>
-          </div>-->
-
-
+            <label for="grad-accum-steps">Grad. Accum. Steps:</label>
+            <input type="number" id="grad-accum-steps" class="form-control" value="1" min="1" max="32">
+          </div>
+          
+          <div class="input-group">
+            <button id="ft-calculate-button" class="calculate-button">Calculate VRAM</button>
+          </div>
         </div>
       </div>
       

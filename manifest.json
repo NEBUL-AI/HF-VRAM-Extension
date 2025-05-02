@@ -41,7 +41,8 @@
             "resources": [
                 "images/icon-128.png",
                 "colors.css",
-                "inference-calculator.js"
+                "inference-calculator.js",
+                "finetune-calculator.js"
             ],
             "matches": [
                 "*://*.huggingface.co/*",

@@ -32,6 +32,12 @@ function switchMode(mode) {
     finetuningFields.classList.add('visible');
   }
   
+  // Hide any previous calculation results
+  const resultsSection = document.getElementById('calc-results');
+  if (resultsSection) {
+    resultsSection.classList.add('hidden');
+  }
+  
   console.log('Mode switch completed to:', mode);
 }
 
@@ -40,15 +46,24 @@ function handleFinetuningMethodChange(method) {
   console.log('Fine-tuning method changed to:', method);
   
   // Get the LoRA rank input group
-  const loraRankGroup = document.getElementById('lora-rank').closest('.input-group');
+  const loraRankGroup = document.getElementById('lora-rank');
+  if (loraRankGroup) {
+    const loraRankContainer = loraRankGroup.closest('.input-group');
+    
+    // Show/hide fields based on the selected method
+    if (method === 'lora' || method === 'qlora') {
+      // Show LoRA-specific fields
+      if (loraRankContainer) loraRankContainer.classList.remove('hidden');
+    } else {
+      // Hide LoRA-specific fields for other methods
+      if (loraRankContainer) loraRankContainer.classList.add('hidden');
+    }
+  }
   
-  // Show/hide fields based on the selected method
-  if (method === 'lora' || method === 'qlora') {
-    // Show LoRA-specific fields
-    if (loraRankGroup) loraRankGroup.classList.remove('hidden');
-  } else {
-    // Hide LoRA-specific fields for other methods
-    if (loraRankGroup) loraRankGroup.classList.add('hidden');
+  // Hide any previous calculation results
+  const resultsSection = document.getElementById('calc-results');
+  if (resultsSection) {
+    resultsSection.classList.add('hidden');
   }
 }
 
