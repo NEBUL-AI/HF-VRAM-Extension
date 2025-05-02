@@ -149,9 +149,9 @@
       
       /* Calculation button styles */
       .calculate-button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
+        background-color: white;
+        color: var(--primary-color);
+        border: 1px solid var(--light-grey);
         border-radius: 4px;
         padding: 8px 16px;
         font-weight: 500;
@@ -162,7 +162,9 @@
       }
       
       .calculate-button:hover {
-        background-color: var(--primary-hover);
+        background-color: var(--primary-color);
+        color: white;
+        border: 1px solid var(--light-grey);
       }
       
       /* Results section styles */
@@ -298,8 +300,10 @@
       <h1>Nebul GenAI</h1>
     </div>
     <div class="content">
-      <p>Welcome to Nebul GenAI - your AI assistant for Hugging Face.</p>
-      <p>This panel will help you interact with models and datasets on Hugging Face.</p>
+      <p>Nebul loves open-source models, but it can be pretty hard to figure out what hardware you need to run them.</p>
+      <p>This tool is originally designed to be usedby ML engineers internally at Nebul.</p>
+      <p>But we thought it might be useful for others, so we've open-sourced it.</p>
+      <p>Please <a href="mailto:engineering@nebul.com">share your feedback</a> with us.</p>
     </div>
     
     <div class="model-info">
