@@ -68,6 +68,87 @@
             });
         }
         
+        // Attempt more thorough parameter extraction for better accuracy
+        if (modelSizeInt === 0) {
+            // Look in model name for patterns like "llama-7b" or "t5-3b"
+            if (modelName) {
+                const modelNameMatch = modelName.toLowerCase().match(/[-_](\d+)b\b/);
+                if (modelNameMatch) {
+                    modelSizeInt = parseFloat(modelNameMatch[1]) * 1000000000;
+                    if (!modelSize) {
+                        modelSize = `${modelNameMatch[1]}B`;
+                    }
+                }
+            }
+            
+            // Look in page tags for parameter information
+            const tagElements = document.querySelectorAll('.inline-flex.h-6');
+            tagElements.forEach(tagElem => {
+                const tagText = tagElem.textContent.toLowerCase();
+                if (tagText.includes('param') && !tagText.includes('model size')) {
+                    const paramMatch = tagText.match(/(\d+\.?\d*)([kmbt])?/i);
+                    if (paramMatch) {
+                        const value = parseFloat(paramMatch[1]);
+                        const unit = (paramMatch[2] || '').toLowerCase();
+                        
+                        switch (unit) {
+                            case 'k':
+                                modelSizeInt = value * 1000;
+                                if (!modelSize) modelSize = `${value}K`;
+                                break;
+                            case 'm':
+                                modelSizeInt = value * 1000000;
+                                if (!modelSize) modelSize = `${value}M`;
+                                break;
+                            case 'b':
+                                modelSizeInt = value * 1000000000;
+                                if (!modelSize) modelSize = `${value}B`;
+                                break;
+                            case 't':
+                                modelSizeInt = value * 1000000000000;
+                                if (!modelSize) modelSize = `${value}T`;
+                                break;
+                            default:
+                                modelSizeInt = value;
+                                if (!modelSize) modelSize = `${value}`;
+                        }
+                    }
+                }
+            });
+        }
+        
+        // If still not found, try to extract from the model description
+        if (modelSizeInt === 0) {
+            const descriptionElement = document.querySelector('.prose');
+            if (descriptionElement) {
+                const descText = descriptionElement.textContent.toLowerCase();
+                const paramMatches = descText.match(/(\d+\.?\d*)[\s-]?([kmbt])[\s-]?(?:illion)?[\s-]?param/i);
+                if (paramMatches) {
+                    const value = parseFloat(paramMatches[1]);
+                    const unit = paramMatches[2].toLowerCase();
+                    
+                    switch (unit) {
+                        case 'k':
+                            modelSizeInt = value * 1000;
+                            if (!modelSize) modelSize = `${value}K`;
+                            break;
+                        case 'm':
+                            modelSizeInt = value * 1000000;
+                            if (!modelSize) modelSize = `${value}M`;
+                            break;
+                        case 'b':
+                            modelSizeInt = value * 1000000000;
+                            if (!modelSize) modelSize = `${value}B`;
+                            break;
+                        case 't':
+                            modelSizeInt = value * 1000000000000;
+                            if (!modelSize) modelSize = `${value}T`;
+                            break;
+                    }
+                }
+            }
+        }
+        
         return { modelName, modelSize, modelSizeInt };
     }
     

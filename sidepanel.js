@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelNameElement = document.getElementById('model-name');
   const modelSizeElement = document.getElementById('model-size');
   
+  // DOM elements for calculation
+  const calculateButton = document.getElementById('calculate-button');
+  const resultsSection = document.getElementById('calc-results');
+  
   // Function to format large numbers with commas for readability
   function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -72,4 +76,174 @@ document.addEventListener('DOMContentLoaded', () => {
     
     return true; // Keep the messaging channel open for async responses
   });
+  
+  // Add click handler for the calculate button
+  calculateButton.addEventListener('click', () => {
+    performCalculation();
+  });
+  
+  // Add click handler for the details toggle
+  const detailsToggle = document.getElementById('details-toggle');
+  const detailsContent = document.getElementById('details-content');
+  
+  detailsToggle.addEventListener('click', () => {
+    detailsContent.classList.toggle('expanded');
+    const toggleIcon = detailsToggle.querySelector('.toggle-icon');
+    toggleIcon.textContent = detailsContent.classList.contains('expanded') ? '▲' : '▼';
+  });
+  
+  // Function to gather input values and trigger calculation
+  function performCalculation() {
+    // Get model parameter count from model info
+    let paramsBillions = 0;
+    const modelSizeText = modelSizeElement.textContent;
+    
+    // Extract parameters in billions from modelInfo if available
+    if (modelSizeText && !modelSizeText.includes('Navigate to a model page')) {
+      const sizeMatch = modelSizeText.match(/(\d+(\.\d+)?)B/);
+      if (sizeMatch) {
+        paramsBillions = parseFloat(sizeMatch[1]);
+      } else {
+        // Try to get from modelSizeInt if available
+        chrome.storage.session.get(['modelInfo'], (result) => {
+          if (result.modelInfo && result.modelInfo.modelSizeInt) {
+            paramsBillions = result.modelInfo.modelSizeInt / 1000000000;
+          }
+        });
+      }
+    }
+    
+    // If we couldn't extract the size, use a default value
+    if (paramsBillions <= 0) {
+      paramsBillions = 7; // Default to 7B parameters
+    }
+    
+    // Get input values
+    const precision = document.getElementById('precision').value.toUpperCase();
+    const gpuName = document.getElementById('gpu').value;
+    const numGpus = parseInt(document.getElementById('number-of-gpus').value, 10);
+    const batchSize = parseInt(document.getElementById('batch-size').value, 10);
+    const seqLength = parseInt(document.getElementById('sequence-length').value, 10);
+    const concurrentRequests = parseInt(document.getElementById('concurrent-requests').value, 10);
+    const isReasoning = true; // Default to reasoning model for LLMs
+    
+    console.log('Calculating VRAM for:', {
+      paramsBillions,
+      precision,
+      gpuName,
+      numGpus,
+      batchSize,
+      seqLength,
+      concurrentRequests,
+      isReasoning
+    });
+    
+    // Perform the calculation
+    try {
+      const result = calculateVramRequirements(
+        paramsBillions,
+        precision,
+        gpuName,
+        numGpus,
+        batchSize,
+        seqLength,
+        concurrentRequests,
+        isReasoning
+      );
+      
+      // Display the results
+      displayResults(result);
+    } catch (error) {
+      console.error('Error calculating VRAM requirements:', error);
+      alert('Error calculating VRAM requirements. Please check the console for details.');
+    }
+  }
+  
+  // Function to display calculation results
+  function displayResults(result) {
+    // Show the results section
+    resultsSection.classList.remove('hidden');
+    
+    // Update the will-it-fit indicator
+    const fitIndicator = document.getElementById('will-it-fit-indicator');
+    fitIndicator.className = 'fit-indicator ' + (result.will_it_fit ? 'fit-yes' : 'fit-no');
+    
+    // Update main results
+    document.getElementById('will-it-fit').textContent = result.will_it_fit ? 'Yes' : 'No';
+    document.getElementById('needed-vram').textContent = `${result.needed_vram} GB`;
+    document.getElementById('total-kv-cache').textContent = `${result.total_kv_cache} GB`;
+    
+    // Update details
+    const details = result.details;
+    const detailsContent = document.getElementById('details-content');
+    
+    detailsContent.innerHTML = `
+      <div class="detail-item">
+        <div class="detail-label">Model Weights:</div>
+        <div class="detail-value">${details.model_weights} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Activation Memory:</div>
+        <div class="detail-value">${details.activation_memory} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">KV Cache:</div>
+        <div class="detail-value">${details.kv_cache} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Base VRAM:</div>
+        <div class="detail-value">${details.base_vram} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Overhead Factor:</div>
+        <div class="detail-value">${details.overhead_factor}×</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Total VRAM:</div>
+        <div class="detail-value">${details.total_vram} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">VRAM per GPU:</div>
+        <div class="detail-value">${details.vram_per_gpu} GB</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">VRAM Usage:</div>
+        <div class="detail-value">${details.vram_usage_percent}%</div>
+      </div>
+    `;
+    
+    // Display suggestions if available
+    const suggestionsSection = document.getElementById('suggestions-section');
+    const suggestionsContent = document.getElementById('suggestions-content');
+    
+    if (result.suggestions && result.suggestions.length > 0) {
+      suggestionsSection.classList.remove('hidden');
+      
+      let suggestionsHtml = '';
+      result.suggestions.forEach(suggestion => {
+        let suggestionText = '';
+        
+        switch (suggestion.type) {
+          case 'reduce_batch_size':
+            suggestionText = `Reduce batch size to ${suggestion.batch_size} (${suggestion.needed_vram} GB)`;
+            break;
+          case 'reduce_sequence_length':
+            suggestionText = `Reduce sequence length to ${suggestion.sequence_length} (${suggestion.needed_vram} GB)`;
+            break;
+          case 'more_quantization':
+            suggestionText = `Use ${suggestion.precision} precision (${suggestion.needed_vram} GB)`;
+            break;
+          case 'increase_gpus':
+            suggestionText = `Use ${suggestion.num_gpus} GPUs (${suggestion.needed_vram} GB)`;
+            break;
+        }
+        
+        suggestionsHtml += `<div class="suggestion-item">${suggestionText}</div>`;
+      });
+      
+      suggestionsContent.innerHTML = suggestionsHtml;
+    } else {
+      suggestionsSection.classList.add('hidden');
+    }
+  }
 });
