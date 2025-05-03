@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Nebul GenAI</title>
@@ -270,41 +271,21 @@
     <!-- Load JavaScript files -->
     <script src="inference-calculator.js"></script>
     <script src="finetune-calculator.js"></script>
-    <script>
-      // Ensure calculator functions are available
-      document.addEventListener('DOMContentLoaded', function() {
-        // Check if inference calculator is loaded
-        if (typeof calculateVramRequirements !== 'function') {
-          console.error('Inference calculator not loaded properly');
-        } else {
-          console.log('Inference calculator loaded successfully');
-        }
-        
-        // Check if fine-tuning calculator is loaded
-        if (typeof FinetuneCalculator === 'undefined' || 
-            typeof FinetuneCalculator.calculateFinetuningRequirements !== 'function') {
-          console.error('Fine-tuning calculator not loaded properly');
-        } else {
-          // Ensure the global function is assigned
-          window.calculateFinetuningRequirements = FinetuneCalculator.calculateFinetuningRequirements;
-          console.log('Fine-tuning calculator loaded successfully');
-        }
-      });
-    </script>
     <script src="sidepanel.js"></script>
     <script src="mode-switcher.js"></script>
+    <script src="sidepanel-init.js"></script>
   </head>
   <body>
     <div class="header">
       <img src="images/icon-128.png" alt="Nebul Logo">
       <h1>Nebul GenAI</h1>
     </div>
-    <div class="content">
+    <!-- <div class="content">
       <p>Nebul loves open-source models, but it can be pretty hard to figure out what hardware you need to run them.</p>
       <p>This tool is originally designed to be used by ML engineers internally at Nebul.</p>
       <p>But we thought it might be useful for others, so we've open-sourced it.</p>
       <p>Please <a href="mailto:engineering@nebul.com">share your feedback</a> with us.</p>
-    </div>
+    </div> -->
     
     <div class="model-info">
       <h2 class="model-info-header">Model Information</h2>
@@ -367,7 +348,7 @@
           
           <div class="input-group">
             <label for="batch-size">Batch Size:</label>
-            <input type="number" id="batch-size" class="form-control" value="32" min="1" max="64">
+            <input type="number" id="batch-size" class="form-control" value="1" min="1" max="64">
           </div>
           
           <div class="input-group">
@@ -415,7 +396,7 @@
 
           <div class="input-group">
             <label for="ft-batch-size">Batch Size:</label>
-            <input type="number" id="ft-batch-size" class="form-control" value="8" min="1" max="64">
+            <input type="number" id="ft-batch-size" class="form-control" value="1" min="1" max="64">
           </div>
           
           <div class="input-group">
@@ -474,44 +455,5 @@
         </div>
       </div>
     </div>
-    
-    <script>
-      // Script to initialize the slider values
-      document.addEventListener('DOMContentLoaded', function() {
-        // Add click event listener for the custom button
-        document.getElementById('custom-button').addEventListener('click', function() {
-          this.textContent = 'Button clicked!';
-          this.style.backgroundColor = 'var(--secondary-color)';
-          
-          // Reset after 1 second
-          setTimeout(() => {
-            this.textContent = 'Calculate VRAM';
-            this.style.backgroundColor = '';
-          }, 1000);
-        });
-
-        // Update the sequence length display value
-        const sequenceLengthSlider = document.getElementById('sequence-length');
-        const sequenceLengthValue = document.getElementById('sequence-length-value');
-        
-        if (sequenceLengthSlider && sequenceLengthValue) {
-          sequenceLengthSlider.addEventListener('input', function() {
-            sequenceLengthValue.textContent = this.value;
-          });
-        }
-        
-        // Update the dataset size display value
-        const datasetSizeSlider = document.getElementById('dataset-size');
-        const datasetSizeValue = document.getElementById('dataset-size-value');
-        
-        if (datasetSizeSlider && datasetSizeValue) {
-          datasetSizeSlider.addEventListener('input', function() {
-            datasetSizeValue.textContent = this.value;
-          });
-        }
-        
-        console.log('Slider initialization complete');
-      });
-    </script>
   </body>
 </html>

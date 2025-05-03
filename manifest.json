@@ -6,6 +6,9 @@
     "background": {
         "service_worker": "service-worker.js"
     },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
     "icons": {
         "128": "images/icon-128.png",
         "16": "images/icon-16.png"
@@ -41,7 +44,8 @@
                 "images/icon-128.png",
                 "colors.css",
                 "inference-calculator.js",
-                "finetune-calculator.js"
+                "finetune-calculator.js",
+                "sidepanel-init.js"
             ],
             "matches": [
                 "*://*.huggingface.co/*",
