@@ -30,10 +30,41 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Handle opening the side panel
   if (message.action === 'openSidePanel') {
+    // Store request data if it exists
+    if (message.data) {
+      if (message.data.deploymentRequest) {
+        chrome.storage.session.set({ deploymentRequest: true });
+      }
+      if (message.data.finetuneRequest) {
+        chrome.storage.session.set({ finetuneRequest: true });
+      }
+    }
+    
     // Open the side panel for the tab that sent the message
     chrome.sidePanel.open({ tabId: sender.tab.id })
       .then(() => {
         console.log('Side panel opened successfully');
+        // After side panel is open, send any request data
+        if (message.data) {
+          setTimeout(() => {
+            if (message.data.deploymentRequest) {
+              chrome.runtime.sendMessage({
+                action: 'deploymentRequested',
+                sourceTabId: sender.tab.id
+              }).catch(err => {
+                console.log('Could not send deployment request to sidepanel directly');
+              });
+            }
+            if (message.data.finetuneRequest) {
+              chrome.runtime.sendMessage({
+                action: 'finetuneRequested',
+                sourceTabId: sender.tab.id
+              }).catch(err => {
+                console.log('Could not send fine-tune request to sidepanel directly');
+              });
+            }
+          }, 500); // Give the side panel a moment to initialize
+        }
         sendResponse({ success: true });
       })
       .catch(error => {

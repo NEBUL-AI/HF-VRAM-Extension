@@ -177,6 +177,15 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
       
+      
+      .results-section.fit-yes-border {
+        border: 1px solid #10b981; /* Green border when it fits */
+      }
+      
+      .results-section.fit-no-border {
+        border: 1px solid #ef4444; /* Red border when it doesn't fit */
+      }
+      
       .result-header {
         display: flex;
         justify-content: space-between;
@@ -334,13 +343,12 @@
             <select id="gpu" class="form-control">
               <option value="rtx-4090">RTX 4090</option>
               <option value="l4">L4</option>
-              <option value="l40s">L40S</option>
+              <option value="l40s" selected>L40S</option>
               <option value="a100">A100</option>
               <option value="h200">H200</option>
               <option value="b200">B200</option>
             </select>
           </div>
-
           <div class="input-group">
             <label for="number-of-gpus">Number of GPUs:</label>
             <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
@@ -382,7 +390,7 @@
             <select id="ft-gpu" class="form-control">
               <option value="rtx-4090">RTX 4090</option>
               <option value="l4">L4</option>
-              <option value="l40s">L40S</option>
+              <option value="l40s" selected>L40S</option>
               <option value="a100">A100</option>
               <option value="h200">H200</option>
               <option value="b200">B200</option>
@@ -440,7 +448,8 @@
         <div class="details-section">
           <div class="details-header" id="details-toggle">
             <span>Details</span>
-            <span class="toggle-icon">▼</span>
+          
+            <span class="toggle-icon">&#8594;</span>
           </div>
           <div class="details-content" id="details-content">
             <!-- Details will be populated by JavaScript -->

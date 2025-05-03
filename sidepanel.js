@@ -50,13 +50,80 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add the integer representation if available
         if (modelInfo.modelSizeInt && modelInfo.modelSizeInt > 0) {
-          sizeDisplay += ` <span class="text-gray-500">(${formatNumber(modelInfo.modelSizeInt)} parameters)</span>`;
+          // sizeDisplay += ` <span class="text-gray-500">(${formatNumber(modelInfo.modelSizeInt)} parameters)</span>`;
+          sizeDisplay += ``;
         }
         
         modelSizeElement.innerHTML = sizeDisplay;
       } else {
         modelSizeElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }
+    }
+  }
+  
+  // Function to handle deployment requests - switches to inference tab
+  function handleDeploymentRequest() {
+    // Get the tab elements
+    const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
+    const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+    
+    // Get the content elements
+    const inferenceContent = document.getElementById('inference-fields');
+    const finetuningContent = document.getElementById('fine-tuning-fields');
+    
+    // Switch to inference tab
+    if (inferenceTab && inferenceContent) {
+      // Update the active tab
+      inferenceTab.classList.add('selected');
+      if (finetuningTab) {
+        finetuningTab.classList.remove('selected');
+      }
+      
+      // Show inference content, hide fine-tuning content
+      inferenceContent.classList.remove('hidden');
+      inferenceContent.classList.add('visible');
+      if (finetuningContent) {
+        finetuningContent.classList.remove('visible');
+        finetuningContent.classList.add('hidden');
+      }
+      
+      // Previously had deployment message - removed
+      
+      // Scroll to the beginning
+      inferenceContent.scrollTop = 0;
+    }
+  }
+  
+  // Function to handle fine-tuning requests - switches to fine-tuning tab
+  function handleFinetuneRequest() {
+    // Get the tab elements
+    const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
+    const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+    
+    // Get the content elements
+    const inferenceContent = document.getElementById('inference-fields');
+    const finetuningContent = document.getElementById('fine-tuning-fields');
+    
+    // Switch to fine-tuning tab
+    if (finetuningTab && finetuningContent) {
+      // Update the active tab
+      finetuningTab.classList.add('selected');
+      if (inferenceTab) {
+        inferenceTab.classList.remove('selected');
+      }
+      
+      // Show fine-tuning content, hide inference content
+      finetuningContent.classList.remove('hidden');
+      finetuningContent.classList.add('visible');
+      if (inferenceContent) {
+        inferenceContent.classList.remove('visible');
+        inferenceContent.classList.add('hidden');
+      }
+      
+      // Previously had fine-tuning message - removed
+      
+      // Scroll to the beginning
+      finetuningContent.scrollTop = 0;
     }
   }
   
@@ -67,6 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+  // Check if this was opened from a deployment or fine-tune request
+  chrome.storage.session.get(['deploymentRequest', 'finetuneRequest'], (result) => {
+    if (result.deploymentRequest) {
+      // Handle the deployment request
+      handleDeploymentRequest();
+      // Clear the flag
+      chrome.storage.session.remove(['deploymentRequest']);
+    }
+    if (result.finetuneRequest) {
+      // Handle the fine-tune request
+      handleFinetuneRequest();
+      // Clear the flag
+      chrome.storage.session.remove(['finetuneRequest']);
+    }
+  });
+  
   // Listen for messages from the service worker
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Message received in side panel:', message);
@@ -74,6 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle model info updates
     if (message.action === 'modelInfoUpdated') {
       updateModelInfoUI(message.data);
+      sendResponse({ received: true });
+    }
+    
+    // Handle deployment requests
+    if (message.action === 'deploymentRequested') {
+      handleDeploymentRequest();
+      sendResponse({ received: true });
+    }
+    
+    // Handle fine-tune requests
+    if (message.action === 'finetuneRequested') {
+      handleFinetuneRequest();
       sendResponse({ received: true });
     }
     
@@ -97,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
   detailsToggle.addEventListener('click', () => {
     detailsContent.classList.toggle('expanded');
     const toggleIcon = detailsToggle.querySelector('.toggle-icon');
-    toggleIcon.textContent = detailsContent.classList.contains('expanded') ? '▲' : '▼';
+    toggleIcon.innerHTML = detailsContent.classList.contains('expanded') ? '&#8595;' : '&#8594;';
   });
   
   // Function to extract parameter count in billions from model info
@@ -170,7 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
       displayResults(result);
     } catch (error) {
       console.error('Error calculating VRAM requirements:', error);
-      alert('Error calculating VRAM requirements. Please check the console for details.');
+      // Check if this is an extension context invalidated error
+      if (error.message && error.message.includes('Extension context invalidated')) {
+        alert('The extension context has been invalidated. Please refresh the page and try again.');
+      } else {
+        alert('Error calculating VRAM requirements. Please check the console for details.');
+      }
     }
   }
   
@@ -227,7 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
       displayFinetuningResults(result);
     } catch (error) {
       console.error('Error calculating fine-tuning VRAM requirements:', error);
-      alert(error.message || 'Error calculating fine-tuning VRAM requirements. Please check the console for details.');
+      // Check if this is an extension context invalidated error
+      if (error.message && error.message.includes('Extension context invalidated')) {
+        alert('The extension context has been invalidated. Please refresh the page and try again.');
+      } else {
+        alert(error.message || 'Error calculating fine-tuning VRAM requirements. Please check the console for details.');
+      }
     }
   }
   
@@ -249,6 +354,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update the will-it-fit indicator
     const fitIndicator = document.getElementById('will-it-fit-indicator');
     fitIndicator.className = 'fit-indicator ' + (result.will_it_fit ? 'fit-yes' : 'fit-no');
+    
+    // Add border to results section based on whether it fits
+    resultsSection.classList.remove('fit-yes-border', 'fit-no-border');
+    resultsSection.classList.add(result.will_it_fit ? 'fit-yes-border' : 'fit-no-border');
     
     // Update main results
     document.getElementById('will-it-fit').textContent = result.will_it_fit ? 'Yes' : 'No';
