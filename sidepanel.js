@@ -49,17 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modelInfo.developerName) {
         modelDeveloperElement.innerHTML = `<span>${modelInfo.developerName}</span>`;
         
-        // Show Meta logo if developer is meta-llama
-        const metaLogo = document.getElementById('meta-logo');
+        // Show developer logo if available
         const developerLogo = document.getElementById('developer-logo');
         
-        // Hide both logos by default
-        metaLogo.style.display = 'none';
+        // Hide logo by default
         developerLogo.style.display = 'none';
         
-        if (modelInfo.developerName === "meta-llama") {
-          metaLogo.style.display = 'block';
-        } else if (modelInfo.developerLogoUrl) {
+        if (modelInfo.developerLogoUrl) {
           // Display the developer logo if available
           developerLogo.src = modelInfo.developerLogoUrl;
           developerLogo.alt = `${modelInfo.developerName} Logo`;
@@ -67,8 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         modelDeveloperElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
-        // Hide all logos if developer name is not available
-        document.getElementById('meta-logo').style.display = 'none';
+        // Hide logo if developer name is not available
         document.getElementById('developer-logo').style.display = 'none';
       }
       
