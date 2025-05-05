@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const batchSize = parseInt(document.getElementById('batch-size').value, 10);
     const seqLength = parseInt(document.getElementById('sequence-length').value, 10);
     const concurrentRequests = parseInt(document.getElementById('concurrent-requests').value, 10);
-    const isReasoning = true; // Default to reasoning model for LLMs
+    const isReasoning = false; // Default to non-reasoning model for LLMs
     
     console.log('Calculating inference VRAM for:', {
       paramsBillions,
