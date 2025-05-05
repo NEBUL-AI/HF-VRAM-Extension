@@ -105,8 +105,11 @@ FinetuneCalculator.calculateModelWeights = function(numParams, precision) {
 };
 
 // Function to calculate activation memory
-FinetuneCalculator.calculateActivationMemory = function(modelWeights, activationFactor) {
-  return modelWeights * activationFactor;
+FinetuneCalculator.calculateActivationMemory = function(modelWeights, activationFactor, batchSize, gradAccumSteps = 1) {
+  // Apply activation factor and then scale down by gradient accumulation steps
+  // since activations are proportional to the micro-batch size
+  const gradAccumReduction = gradAccumSteps > 1 ? gradAccumSteps : 1;
+  return (modelWeights * activationFactor) / gradAccumReduction;
 };
 
 // Function to calculate optimizer states
@@ -196,7 +199,9 @@ FinetuneCalculator.computeFinetuningRequirements = function(
   const modelWeights = FinetuneCalculator.calculateModelWeights(paramsBillions, modelPrecision);
   const activationMemory = FinetuneCalculator.calculateActivationMemory(
     modelWeights, 
-    methodConfig.activation_factor
+    methodConfig.activation_factor,
+    batchSize,
+    gradAccumSteps
   );
   const optimizerStates = FinetuneCalculator.calculateOptimizerStates(
     modelWeights, 
