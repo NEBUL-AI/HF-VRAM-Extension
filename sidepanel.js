@@ -405,10 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="detail-value">${details.optimizer_states} GB</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Gradient Checkpointing:</div>
-          <div class="detail-value">${details.gradient_checkpointing ? 'Enabled' : 'Disabled'}</div>
-        </div>
-        <div class="detail-item">
           <div class="detail-label">Effective Batch Size:</div>
           <div class="detail-value">${details.effective_batch_size}</div>
         </div>
