@@ -37,6 +37,7 @@
         border-radius: 8px;
         padding: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
       }
       .model-info-header {
         font-size: 18px;
@@ -44,6 +45,13 @@
         margin-top: 0;
         margin-bottom: 12px;
         font-weight: 600;
+      }
+      .meta-logo {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        height: 22px;
+        display: none;
       }
       .info-item {
         display: flex;
@@ -298,6 +306,15 @@
     
     <div class="model-info">
       <h2 class="model-info-header">Model Information</h2>
+      <img src="images/meta.png" alt="Meta Logo" class="meta-logo" id="meta-logo">
+      <img src="" alt="Developer Logo" class="meta-logo" id="developer-logo">
+      
+      <div class="info-item">
+        <div class="info-label">Developer:</div>
+        <div id="model-developer" class="info-value">
+          <span class="placeholder-text">Navigate to a model page...</span>
+        </div>
+      </div>
       
       <div class="info-item">
         <div class="info-label">Name:</div>

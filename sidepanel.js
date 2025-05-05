@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // DOM elements for model info
   const modelNameElement = document.getElementById('model-name');
   const modelSizeElement = document.getElementById('model-size');
+  const modelDeveloperElement = document.getElementById('model-developer');
   
   // DOM elements for calculation - Inference
   const calculateButton = document.getElementById('calculate-button');
@@ -42,6 +43,33 @@ document.addEventListener('DOMContentLoaded', () => {
         modelNameElement.innerHTML = `<span>${modelInfo.modelName}</span>`;
       } else {
         modelNameElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
+      }
+      
+      // Update developer name
+      if (modelInfo.developerName) {
+        modelDeveloperElement.innerHTML = `<span>${modelInfo.developerName}</span>`;
+        
+        // Show Meta logo if developer is meta-llama
+        const metaLogo = document.getElementById('meta-logo');
+        const developerLogo = document.getElementById('developer-logo');
+        
+        // Hide both logos by default
+        metaLogo.style.display = 'none';
+        developerLogo.style.display = 'none';
+        
+        if (modelInfo.developerName === "meta-llama") {
+          metaLogo.style.display = 'block';
+        } else if (modelInfo.developerLogoUrl) {
+          // Display the developer logo if available
+          developerLogo.src = modelInfo.developerLogoUrl;
+          developerLogo.alt = `${modelInfo.developerName} Logo`;
+          developerLogo.style.display = 'block';
+        }
+      } else {
+        modelDeveloperElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
+        // Hide all logos if developer name is not available
+        document.getElementById('meta-logo').style.display = 'none';
+        document.getElementById('developer-logo').style.display = 'none';
       }
       
       // Update model size - show both human-readable and exact parameter count

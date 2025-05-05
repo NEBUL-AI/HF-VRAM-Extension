@@ -69,6 +69,53 @@
             modelName = modelNameElement.textContent.trim();
         }
         
+        // Extract developer name based on the example HTML structure
+        let developerName = '';
+        // Try to find the developer using the class structure from the example
+        const developerElement = document.querySelector('h1 div.group.flex.flex-none.items-center a[href^="/"]');
+        if (developerElement) {
+            developerName = developerElement.textContent.trim();
+        }
+        
+        // Extract developer logo image URL
+        let developerLogoUrl = '';
+        // Try to find the developer logo image from the example structure
+        const developerLogoElement = document.querySelector('h1 div.group.flex.flex-none.items-center img');
+        if (developerLogoElement && developerLogoElement.src) {
+            developerLogoUrl = developerLogoElement.src;
+        }
+        
+        // Fallback approach if the first method doesn't work
+        if (!developerName) {
+            // Look for links that look like organization links
+            const possibleDevElements = document.querySelectorAll('h1 a[href^="/"]');
+            for (const elem of possibleDevElements) {
+                // Skip if it contains the model name (likely not the org)
+                if (elem.textContent.includes('/')) continue;
+                
+                // Get the developer name
+                developerName = elem.textContent.trim();
+                // Try to find an associated image
+                if (developerName && !developerLogoUrl) {
+                    const img = elem.querySelector('img');
+                    if (img && img.src) {
+                        developerLogoUrl = img.src;
+                    }
+                }
+                if (developerName) break;
+            }
+        }
+        
+        // Extract from URL path as a final fallback
+        if (!developerName) {
+            const urlPath = window.location.pathname;
+            // URL format is typically /{organization}/{model-name}
+            const pathParts = urlPath.split('/').filter(part => part.trim() !== '');
+            if (pathParts.length >= 2) {
+                developerName = pathParts[0];
+            }
+        }
+        
         // Extract model size (number of parameters) based on the exact HTML structure provided
         let modelSize = '';
         let modelSizeInt = 0;
@@ -167,7 +214,7 @@
             }
         }
         
-        return { modelName, modelSize, modelSizeInt };
+        return { modelName, modelSize, modelSizeInt, developerName, developerLogoUrl };
     }
     
     // Function to send model info to the side panel
