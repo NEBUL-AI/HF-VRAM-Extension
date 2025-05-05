@@ -359,30 +359,39 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsSection.classList.remove('fit-yes-border', 'fit-no-border');
     resultsSection.classList.add(result.will_it_fit ? 'fit-yes-border' : 'fit-no-border');
     
+    // Calculate available VRAM
+    const gpuValue = isFinetuning ? 
+      document.getElementById('ft-gpu').value : 
+      document.getElementById('gpu').value;
+    const numGpus = parseInt(isFinetuning ? 
+      document.getElementById('ft-number-of-gpus').value : 
+      document.getElementById('number-of-gpus').value, 10);
+    
+    // Get the GPU VRAM size
+    let gpuVramGB;
+    const gpuSizes = isFinetuning ? FinetuneCalculator.COMMON_GPUS : COMMON_GPUS;
+    if (typeof gpuValue === 'string' && gpuSizes[gpuValue] !== undefined) {
+      gpuVramGB = gpuSizes[gpuValue];
+    } else {
+      gpuVramGB = 24.0; // Default to RTX 4090 if invalid
+    }
+    
+    const totalAvailableVram = gpuVramGB * numGpus;
+    
     // Update main results
     document.getElementById('will-it-fit').textContent = result.will_it_fit ? 'Yes' : 'No';
     document.getElementById('needed-vram').textContent = `${result.needed_vram} GB`;
-    
-    // Set KV Cache (different display for inference vs fine-tuning)
-    const kvCacheElement = document.getElementById('total-kv-cache');
-    if (isFinetuning) {
-      if (result.details.optimizer_states) {
-        kvCacheElement.parentElement.querySelector('.result-label').textContent = 'Optimizer States:';
-        kvCacheElement.textContent = `${result.details.optimizer_states} GB`;
-      } else {
-        kvCacheElement.parentElement.querySelector('.result-label').textContent = 'KV Cache:';
-        kvCacheElement.textContent = `${result.details.kv_cache} GB`;
-      }
-    } else {
-      kvCacheElement.parentElement.querySelector('.result-label').textContent = 'KV Cache:';
-      kvCacheElement.textContent = `${result.total_kv_cache} GB`;
-    }
+    document.getElementById('vram-usage-percent').textContent = `${result.details.vram_usage_percent}%`;
+    document.getElementById('available-vram').textContent = `${totalAvailableVram} GB`;
     
     // Update details
     const details = result.details;
     const detailsContent = document.getElementById('details-content');
     
-    let detailsHtml = `
+    let detailsHtml = '';
+    
+    // Common core components for both modes
+    detailsHtml += `
       <div class="detail-item">
         <div class="detail-label">Model Weights:</div>
         <div class="detail-value">${details.model_weights} GB</div>
@@ -424,10 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="detail-item">
         <div class="detail-label">VRAM per GPU:</div>
         <div class="detail-value">${details.vram_per_gpu} GB</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">VRAM Usage:</div>
-        <div class="detail-value">${details.vram_usage_percent}%</div>
       </div>
     `;
     
