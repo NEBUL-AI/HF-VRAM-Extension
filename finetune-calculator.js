@@ -56,7 +56,6 @@ FinetuneCalculator.FINETUNING_METHODS = {
     model_weight_precision: "FP16",  // Typical precision for model weights
     optimizer_states_factor: 4.0,    // Factor for Adam optimizer states (4x weights)
     activation_factor: 2.0,          // Activations for full training
-    gradient_checkpointing: false,   // If gradient checkpointing is used by default
     adapter_overhead: 0.0            // No adapter modules
   },
   "lora": {
@@ -64,7 +63,6 @@ FinetuneCalculator.FINETUNING_METHODS = {
     model_weight_precision: "FP16",  // Base model precision
     optimizer_states_factor: 0.1,    // Much smaller optimizer states (only adapters)
     activation_factor: 1.0,          // Reduced activations due to freezing
-    gradient_checkpointing: true,    // Gradient checkpointing often used
     adapter_overhead: 0.05           // 5% overhead for adapter modules
   },
   "qlora": {
@@ -72,7 +70,6 @@ FinetuneCalculator.FINETUNING_METHODS = {
     model_weight_precision: "INT4",  // Quantized base model
     optimizer_states_factor: 0.1,    // Only adapter modules are optimized
     activation_factor: 0.5,          // Further reduced activations
-    gradient_checkpointing: true,    // Almost always used
     adapter_overhead: 0.05           // 5% overhead for adapter modules
   }
 };
@@ -133,26 +130,14 @@ FinetuneCalculator.calculateKVCache = function(hiddenDim, numLayers, batchSize, 
   return batchSize * seqLength * kvCachePerToken;
 };
 
-// Function to calculate gradient checkpointing savings
-FinetuneCalculator.calculateGradientCheckpointingSavings = function(activationMemory) {
-  // Gradient checkpointing typically reduces activation memory by ~75%
-  return activationMemory * 0.25; // Keep only 25% of original
-};
-
 // Function to calculate total training VRAM
 FinetuneCalculator.calculateTotalTrainingVram = function(
   modelWeights,
   activationMemory,
   optimizerStates,
   kvCache,
-  adapterOverhead = 0.0,
-  useGradientCheckpointing = false
+  adapterOverhead = 0.0
 ) {
-  // Apply gradient checkpointing savings if enabled
-  if (useGradientCheckpointing) {
-    activationMemory = FinetuneCalculator.calculateGradientCheckpointingSavings(activationMemory);
-  }
-  
   // Calculate base VRAM
   let baseVram = modelWeights + activationMemory + optimizerStates + kvCache;
   
@@ -227,15 +212,13 @@ FinetuneCalculator.computeFinetuningRequirements = function(
   
   // Calculate total VRAM
   const adapterOverhead = methodConfig.adapter_overhead || 0.0;
-  const useGradientCheckpointing = methodConfig.gradient_checkpointing || false;
   
   const totalVram = FinetuneCalculator.calculateTotalTrainingVram(
     modelWeights,
     activationMemory,
     optimizerStates,
     kvCache,
-    adapterOverhead,
-    useGradientCheckpointing
+    adapterOverhead
   );
   
   // Distribute across GPUs if multiple GPUs available
@@ -259,7 +242,6 @@ FinetuneCalculator.computeFinetuningRequirements = function(
       activation_memory: FinetuneCalculator.round(activationMemory, 2),
       optimizer_states: FinetuneCalculator.round(optimizerStates, 2),
       kv_cache: FinetuneCalculator.round(kvCache, 2),
-      gradient_checkpointing: useGradientCheckpointing,
       method_description: methodConfig.description,
       total_vram: FinetuneCalculator.round(totalVram, 2),
       vram_per_gpu: FinetuneCalculator.round(vramPerGpu, 2),
