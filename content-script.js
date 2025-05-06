@@ -265,8 +265,8 @@
                     try {
                         nebulItem.innerHTML = `
                             <a class="group flex items-center px-2 py-0.5 dark:text-gray-300 dark:hover:text-gray-100 cursor-pointer nebul-nav-link" href="#">
-                                <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="mr-1.5 w-4 h-4" alt="Nebul">
-                                Nebul
+                                <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="mr-1.5 w-4 h-4" alt="VRAM">
+                                VRAM
                             </a>
                         `;
                     } catch (error) {
@@ -291,7 +291,7 @@
                             if (isExtensionContextValid()) {
                                 chrome.runtime.sendMessage({ action: 'openSidePanel' }, (response) => {
                                     if (response && response.success) {
-                                        console.log(response.wasOpen ? 'Requested to close Nebul side panel' : 'Requested to open Nebul side panel');
+                                        console.log(response.wasOpen ? 'Requested to close VRAM side panel' : 'Requested to open VRAM side panel');
                                     } else {
                                         console.error('Error toggling side panel:', response ? response.error : 'Unknown error');
                                     }
@@ -304,7 +304,7 @@
                     
                     // Insert the Nebul item after the Pricing item
                     pricingItem.after(nebulItem);
-                    console.log('Nebul option added to navbar');
+                    console.log('VRAM option added to navbar');
                 }
             }
         } catch (error) {
@@ -347,7 +347,7 @@
                                             <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="text-2xl w-6 h-6" alt="Nebul">
                                             <div class="w-full">
                                                 <dt class="flex items-center">
-                                                    <span class="text-base font-semibold leading-snug text-gray-800">Nebul</span>
+                                                    <span class="text-base font-semibold leading-snug text-gray-800">Calculate VRAM</span>
                                                     <span class="ml-auto mr-2 rounded-sm bg-blue-500/10 px-1.5 py-0.5 text-[.6rem] font-semibold leading-tight text-blue-700 dark:bg-blue-500/30 dark:text-blue-200">NEW</span>
                                                 </dt>
                                                 <dd class="whitespace-pre-wrap text-sm text-gray-400">Fine-tune on optimized GPU infrastructure</dd>
@@ -380,7 +380,7 @@
                                             data: { finetuneRequest: true }
                                         }, (response) => {
                                             if (response && response.success) {
-                                                console.log(response.wasOpen ? 'Closed Nebul fine-tuning panel' : 'Opened Nebul fine-tuning panel');
+                                                console.log(response.wasOpen ? 'Closed VRAM fine-tuning panel' : 'Opened VRAM fine-tuning panel');
                                             }
                                         });
                                     }
@@ -397,7 +397,7 @@
                                             <img src="${chrome.runtime.getURL('images/icon-128.png')}" class="text-2xl w-6 h-6" alt="Nebul">
                                             <div class="w-full">
                                                 <dt class="flex items-center">
-                                                    <span class="text-base font-semibold leading-snug text-gray-800">Nebul</span>
+                                                    <span class="text-base font-semibold leading-snug text-gray-800">Calculate VRAM</span>
                                                     <span class="ml-auto mr-2 rounded-sm bg-blue-500/10 px-1.5 py-0.5 text-[.6rem] font-semibold leading-tight text-blue-700 dark:bg-blue-500/30 dark:text-blue-200">NEW</span>
                                                 </dt>
                                                 <dd class="whitespace-pre-wrap text-sm text-gray-400">Deploy on optimized GPU infrastructure</dd>
@@ -421,7 +421,7 @@
                                             data: { deploymentRequest: true }
                                         }, (response) => {
                                             if (response && response.success) {
-                                                console.log(response.wasOpen ? 'Closed Nebul deployment panel' : 'Opened Nebul deployment panel');
+                                                console.log(response.wasOpen ? 'Closed VRAM deployment panel' : 'Opened VRAM deployment panel');
                                             }
                                         });
                                     }
@@ -449,7 +449,7 @@
                             }
                         }
                         
-                        console.log(`Nebul option added to ${isTrainDropdown ? 'train' : 'deploy'} dropdown`);
+                        console.log(`VRAM option added to ${isTrainDropdown ? 'train' : 'deploy'} dropdown`);
                     } catch (error) {
                         console.error('Error handling dropdown content:', error);
                     }
