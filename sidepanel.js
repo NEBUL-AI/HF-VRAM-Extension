@@ -30,6 +30,61 @@ document.addEventListener('DOMContentLoaded', () => {
   // DOM elements for calculation - Fine-tuning
   const ftCalculateButton = document.getElementById('ft-calculate-button');
   
+  // Set up tabs functionality
+  const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
+  const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+  
+  if (inferenceTab && finetuningTab) {
+    inferenceTab.addEventListener('click', () => {
+      // Check if we're on a model page before showing the inference tab
+      chrome.storage.session.get(['modelInfo'], (result) => {
+        if (result.modelInfo && result.modelInfo.onModelPage === false) {
+          // If not on a model page, don't change anything, just keep showing welcome message
+          showWelcomeUI();
+        } else {
+          // If on a model page, switch to inference tab
+          handleTabChange('inference');
+        }
+      });
+    });
+    
+    finetuningTab.addEventListener('click', () => {
+      // Check if we're on a model page before showing the fine-tuning tab
+      chrome.storage.session.get(['modelInfo'], (result) => {
+        if (result.modelInfo && result.modelInfo.onModelPage === false) {
+          // If not on a model page, don't change anything, just keep showing welcome message
+          showWelcomeUI();
+        } else {
+          // If on a model page, switch to fine-tuning tab
+          handleTabChange('fine-tuning');
+        }
+      });
+    });
+  }
+  
+  function handleTabChange(mode) {
+    // Update tab UI state
+    if (mode === 'inference') {
+      inferenceTab.classList.add('selected');
+      finetuningTab.classList.remove('selected');
+      
+      // Show inference content, hide fine-tuning content
+      document.getElementById('inference-fields').classList.remove('hidden');
+      document.getElementById('inference-fields').classList.add('visible');
+      document.getElementById('fine-tuning-fields').classList.remove('visible');
+      document.getElementById('fine-tuning-fields').classList.add('hidden');
+    } else {
+      finetuningTab.classList.add('selected');
+      inferenceTab.classList.remove('selected');
+      
+      // Show fine-tuning content, hide inference content
+      document.getElementById('fine-tuning-fields').classList.remove('hidden');
+      document.getElementById('fine-tuning-fields').classList.add('visible');
+      document.getElementById('inference-fields').classList.remove('visible');
+      document.getElementById('inference-fields').classList.add('hidden');
+    }
+  }
+  
   // Function to format large numbers with commas for readability
   function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -38,6 +93,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Function to update the model info UI
   function updateModelInfoUI(modelInfo) {
     if (modelInfo) {
+      // Check if we're on a model page
+      if (modelInfo.onModelPage === false) {
+        // We're not on a model page, show the welcome UI
+        showWelcomeUI();
+        return;
+      }
+      
+      // We're on a model page, show the model info
+      showModelInfoUI();
+      
       // Update model name
       if (modelInfo.modelName) {
         modelNameElement.innerHTML = `<span>${modelInfo.modelName}</span>`;
@@ -84,76 +149,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Function to handle deployment requests - switches to inference tab
-  function handleDeploymentRequest() {
-    // Get the tab elements
-    const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
-    const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+  // Function to show the welcome UI when not on a model page
+  function showWelcomeUI() {
+    // Get references to the model info and calculation cards
+    const modelInfoCard = document.querySelector('.model-info');
+    const calculationCard = document.querySelector('.custom-button-container');
+    const welcomeCard = document.getElementById('welcome-card');
     
-    // Get the content elements
-    const inferenceContent = document.getElementById('inference-fields');
-    const finetuningContent = document.getElementById('fine-tuning-fields');
+    // Hide model info and calculation cards
+    if (modelInfoCard) modelInfoCard.style.display = 'none';
+    if (calculationCard) calculationCard.style.display = 'none';
     
-    // Switch to inference tab
-    if (inferenceTab && inferenceContent) {
-      // Update the active tab
-      inferenceTab.classList.add('selected');
-      if (finetuningTab) {
-        finetuningTab.classList.remove('selected');
+    // If welcome card doesn't exist, create it
+    if (!welcomeCard) {
+      const newWelcomeCard = document.createElement('div');
+      newWelcomeCard.id = 'welcome-card';
+      newWelcomeCard.className = 'welcome-card';
+      newWelcomeCard.innerHTML = `
+        <h2 class="welcome-header">Welcome to VRAM Calculator</h2>
+        <p>This extension helps you calculate the GPU VRAM requirements for running AI models.</p>
+        <p>Navigate to any <a href="https://huggingface.co/models" target="_blank">model page on Hugging Face</a> to analyze VRAM needs for inference or fine-tuning.</p>
+      `;
+      
+      // Insert after the header
+      const header = document.querySelector('.header');
+      if (header) {
+        header.after(newWelcomeCard);
+      } else {
+        document.body.appendChild(newWelcomeCard);
       }
-      
-      // Show inference content, hide fine-tuning content
-      inferenceContent.classList.remove('hidden');
-      inferenceContent.classList.add('visible');
-      if (finetuningContent) {
-        finetuningContent.classList.remove('visible');
-        finetuningContent.classList.add('hidden');
-      }
-      
-      // Previously had deployment message - removed
-      
-      // Scroll to the beginning
-      inferenceContent.scrollTop = 0;
+    } else {
+      // Show the welcome card if it exists
+      welcomeCard.style.display = 'block';
     }
   }
   
-  // Function to handle fine-tuning requests - switches to fine-tuning tab
-  function handleFinetuneRequest() {
-    // Get the tab elements
-    const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
-    const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+  // Function to show the model info UI when on a model page
+  function showModelInfoUI() {
+    // Get references to the model info and calculation cards
+    const modelInfoCard = document.querySelector('.model-info');
+    const calculationCard = document.querySelector('.custom-button-container');
+    const welcomeCard = document.getElementById('welcome-card');
     
-    // Get the content elements
-    const inferenceContent = document.getElementById('inference-fields');
-    const finetuningContent = document.getElementById('fine-tuning-fields');
+    // Show model info and calculation cards
+    if (modelInfoCard) modelInfoCard.style.display = 'block';
+    if (calculationCard) calculationCard.style.display = 'block';
     
-    // Switch to fine-tuning tab
-    if (finetuningTab && finetuningContent) {
-      // Update the active tab
-      finetuningTab.classList.add('selected');
-      if (inferenceTab) {
-        inferenceTab.classList.remove('selected');
-      }
-      
-      // Show fine-tuning content, hide inference content
-      finetuningContent.classList.remove('hidden');
-      finetuningContent.classList.add('visible');
-      if (inferenceContent) {
-        inferenceContent.classList.remove('visible');
-        inferenceContent.classList.add('hidden');
-      }
-      
-      // Previously had fine-tuning message - removed
-      
-      // Scroll to the beginning
-      finetuningContent.scrollTop = 0;
-    }
+    // Hide the welcome card if it exists
+    if (welcomeCard) welcomeCard.style.display = 'none';
   }
   
   // Check if there's already model info in storage
   chrome.storage.session.get(['modelInfo'], (result) => {
     if (result.modelInfo) {
       updateModelInfoUI(result.modelInfo);
+    } else {
+      // If no model info, default to welcome UI
+      showWelcomeUI();
     }
   });
   
@@ -161,13 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.session.get(['deploymentRequest', 'finetuneRequest'], (result) => {
     if (result.deploymentRequest) {
       // Handle the deployment request
-      handleDeploymentRequest();
+      handleTabChange('inference');
       // Clear the flag
       chrome.storage.session.remove(['deploymentRequest']);
     }
     if (result.finetuneRequest) {
       // Handle the fine-tune request
-      handleFinetuneRequest();
+      handleTabChange('fine-tuning');
       // Clear the flag
       chrome.storage.session.remove(['finetuneRequest']);
     }
@@ -193,13 +245,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Handle deployment requests
     if (message.action === 'deploymentRequested') {
-      handleDeploymentRequest();
+      handleTabChange('inference');
       sendResponse({ received: true });
     }
     
     // Handle fine-tune requests
     if (message.action === 'finetuneRequested') {
-      handleFinetuneRequest();
+      handleTabChange('fine-tuning');
       sendResponse({ received: true });
     }
     
