@@ -1,5 +1,10 @@
 // Content script to add "Nebul" option to Hugging Face navbar
 (function() {
+    // Global variable to track if we're on a model page
+    let onModelPage = false;
+    // Store the last URL to detect navigation
+    let lastUrl = window.location.href;
+    
     // Helper function to check if extension context is valid
     function isExtensionContextValid() {
         try {
@@ -7,6 +12,51 @@
             return true;
         } catch (e) {
             console.error('Extension context invalid:', e);
+            return false;
+        }
+    }
+
+    // Function to check if the current page is a model page
+    function checkIfModelPage() {
+        try {
+            // Get URL path to check for obvious non-model paths
+            const urlPath = window.location.pathname.toLowerCase();
+            const nonModelPaths = ['datasets', 'spaces', 'docs', 'enterprise', 'pricing', 'post'];
+            
+            // If URL contains any non-model path identifiers, it's not a model page
+            if (nonModelPaths.some(path => urlPath.includes(`/${path}`))) {
+                onModelPage = false;
+                return false;
+            }
+            
+            // Extract model info to check for additional indicators
+            const { modelName, developerName } = extractModelInfo();
+            
+            // If developer name or model name contains any of the non-model indicators
+            const nonModelTerms = ['datasets', 'spaces', 'post', 'docs', 'enterprise', 'pricing'];
+            
+            if (modelName && nonModelTerms.some(term => modelName.toLowerCase().includes(term))) {
+                onModelPage = false;
+                return false;
+            }
+            
+            if (developerName && nonModelTerms.some(term => developerName.toLowerCase().includes(term))) {
+                onModelPage = false;
+                return false;
+            }
+            
+            // If we have a model name, assume it's a model page
+            if (modelName) {
+                onModelPage = true;
+                return true;
+            }
+            
+            // Default to false if we can't determine
+            onModelPage = false;
+            return false;
+        } catch (error) {
+            console.error('Error in checkIfModelPage:', error);
+            onModelPage = false;
             return false;
         }
     }
@@ -222,13 +272,27 @@
         try {
             if (!isExtensionContextValid()) return;
             
-            const modelInfo = extractModelInfo();
-            if (modelInfo.modelName || modelInfo.modelSize) {
-                chrome.runtime.sendMessage({ 
-                    action: 'updateModelInfo', 
-                    data: modelInfo 
+            
+            // Check if we're on a model page first
+            const isModelPage = checkIfModelPage();
+            
+            // Only send model info if we're on a model page
+            if (isModelPage) {
+                const modelInfo = extractModelInfo();
+                if (modelInfo.modelName || modelInfo.modelSize) {
+                    chrome.runtime.sendMessage({ 
+                        action: 'updateModelInfo', 
+                        data: modelInfo 
+                    });
+                    console.log('Sent model info to side panel:', modelInfo);
+                }
+            } else {
+                // If not on a model page, send that information as well
+                chrome.runtime.sendMessage({
+                    action: 'updateModelInfo',
+                    data: { onModelPage: false }
                 });
-                console.log('Sent model info to side panel:', modelInfo);
+                console.log('Not on a model page, sending update');
             }
         } catch (error) {
             console.error('Error sending model info to side panel:', error);
@@ -492,7 +556,12 @@
             if (document.querySelector('nav[aria-label="Main"] ul')) {
                 injectColorsCSS();
                 addNebulToNavbar();
-                // Extract and send model info after adding Nebul to navbar
+                
+                // Check if we're on a model page and then extract/send model info
+                checkIfModelPage();
+                // Send update about page type
+                sendPageTypeUpdate();
+                // Send model info if relevant
                 sendModelInfoToSidePanel();
                 
                 // Start monitoring for deploy dropdown
@@ -506,6 +575,41 @@
         }
     }
     
+    // Function to handle URL changes
+    function handleUrlChange() {
+        const currentUrl = window.location.href;
+        if (currentUrl !== lastUrl) {
+            lastUrl = currentUrl;
+            console.log('URL changed, checking if on model page...');
+            
+            // Check if we're on a model page and update accordingly
+            checkIfModelPage();
+            
+            // Send an update about page type
+            sendPageTypeUpdate();
+            
+            // Also send model info if we're on a model page
+            if (onModelPage) {
+                sendModelInfoToSidePanel();
+            }
+        }
+    }
+    
+    // Function to send a page type update to background
+    function sendPageTypeUpdate() {
+        try {
+            if (!isExtensionContextValid()) return;
+            
+            chrome.runtime.sendMessage({
+                action: 'pageTypeUpdate',
+                data: { onModelPage }
+            });
+            console.log(`Sent page type update: ${onModelPage ? 'MODEL PAGE' : 'NOT MODEL PAGE'}`);
+        } catch (error) {
+            console.error('Error sending page type update:', error);
+        }
+    }
+    
     // Check if URL contains huggingface.co or hf.co
     try {
         if (window.location.hostname.includes('huggingface.co') || 
@@ -513,9 +617,15 @@
             
             // Wait for page to load
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', checkAndAddNebul);
+                document.addEventListener('DOMContentLoaded', () => {
+                    checkAndAddNebul();
+                    // Also set up URL change detection
+                    setInterval(handleUrlChange, 1000);
+                });
             } else {
                 checkAndAddNebul();
+                // Also set up URL change detection
+                setInterval(handleUrlChange, 1000);
             }
             
             // Also observe DOM changes to handle SPA navigation and update model info
@@ -529,7 +639,11 @@
                                     window.nebulObserverTimeout = setTimeout(() => {
                                         try {
                                             checkAndAddNebul();
-                                            // Also check and send model info separately in case the page content updates
+                                            // Also check if we're on a model page and update the global variable
+                                            checkIfModelPage();
+                                            // Send update about page type
+                                            sendPageTypeUpdate();
+                                            // Then send model info separately
                                             sendModelInfoToSidePanel();
                                             window.nebulObserverTimeout = null;
                                         } catch (error) {
