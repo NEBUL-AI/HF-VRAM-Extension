@@ -2,233 +2,261 @@
 <html>
   <head>
     <title>VRAM Calculator</title>
-    <link rel="stylesheet" href="colors.css">
     <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        margin: 0;
-        padding: 16px;
-        background-color: var(--background-color);
+      :root {
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --success: #10b981;
+        --error: #ef4444;
+        --background: #f9fafb;
+        --card-bg: #ffffff;
+        --text: #1f2937;
+        --text-secondary: #6b7280;
+        --border: #e5e7eb;
+        --border-radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.2s ease;
       }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+          Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: var(--background);
+        color: var(--text);
+        line-height: 1.5;
+        padding: 16px;
+        font-size: 14px;
+      }
+      
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      
+      /* Header Styles */
       .header {
         display: flex;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 24px;
       }
+      
       .header img {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         margin-right: 12px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
       }
-      h1 {
-        font-size: 22px;
-        color: var(--primary-color);
+      
+      .header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.5px;
         margin: 0;
       }
-      .content {
-        background-color: white;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 16px;
-      }
       
-      /* Welcome Card Styles */
-      .welcome-card {
-        background-color: white;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      /* Card Styles */
+      .card {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 20px;
         margin-bottom: 16px;
-      }
-      .welcome-header {
-        font-size: 18px;
-        color: var(--primary-color);
-        margin-top: 0;
-        margin-bottom: 12px;
-        font-weight: 600;
-      }
-      .welcome-card p {
-        margin: 8px 0;
-        line-height: 1.5;
-        color: var(--text-color);
-      }
-      .welcome-card a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-      }
-      .welcome-card a:hover {
-        text-decoration: underline;
-      }
-      
-      .model-info {
-        background-color: white;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        position: relative;
-      }
-      .model-info-header {
-        font-size: 18px;
-        color: var(--primary-color);
-        margin-top: 0;
-        margin-bottom: 12px;
-        font-weight: 600;
-      }
-      .meta-logo {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        height: 22px;
-        display: none;
-      }
-      .info-item {
-        display: flex;
-        margin-bottom: 8px;
-      }
-      .info-label {
-        width: 100px;
-        font-weight: 500;
-        color: var(--text-color);
-      }
-      .info-value {
-        flex: 1;
-        color: var(--primary-color);
-        font-weight: 500;
-      }
-      .placeholder-text {
-        color: #888;
-        font-style: italic;
-      }
-      .text-gray-500 {
-        color: #71717a;
-        font-size: 0.9em;
-      }
-      .custom-button-container {
-        margin-top: 16px;
-        background-color: white;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-      .custom-button {
-        background-color: white;
-        color: var(--primary-color);
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-        padding: 8px 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-      .custom-button:hover {
-        background-color: var(--secondary-color);
-      }
-      .mode-selection {
-        display: flex;
-        margin-bottom: 16px;
-        border-radius: 6px;
+        transition: var(--transition);
+        border: 1px solid var(--border);
         overflow: hidden;
-        border: 1px solid var(--light-grey);
       }
       
-      .mode-option {
-        flex: 1;
-        text-align: center;
-        padding: 10px;
-        cursor: pointer;
-        background-color: #f1f5f9;
-        transition: all 0.2s;
+      .card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
       }
       
-      .mode-option.selected {
-        background-color: white;
-        font-weight: 500;
-      }
-      
-      .input-section {
+      .card-header {
         margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
       
-      .input-group {
-        margin-bottom: 12px;
+      .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+        letter-spacing: -0.5px;
+      }
+      
+      /* Model Info Styles */
+      .info-list {
+        display: grid;
+        gap: 12px;
+      }
+      
+      .info-item {
         display: flex;
         align-items: center;
       }
       
-      .input-group label {
-        width: 140px;
+      .info-label {
+        min-width: 100px;
         font-weight: 500;
+        color: var(--text-secondary);
+      }
+      
+      .info-value {
+        font-weight: 600;
+        color: var(--text);
+      }
+      
+      .placeholder-text {
+        color: var(--text-secondary);
+        font-style: italic;
+        font-weight: normal;
+      }
+      
+      /* Mode Switcher */
+      .tabs {
+        display: flex;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        margin-bottom: 20px;
+        background-color: #f3f4f6;
+        padding: 2px;
+      }
+      
+      .tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        border-radius: 10px;
+      }
+      
+      
+      /* Apply style to tabs with either active or selected class, but not both */
+      .tab.active, .tab.selected {
+        background-color: var(--card-bg);
+        color: var(--primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Form Inputs */
+      .form-section {
+        margin-bottom: 24px;
+      }
+      
+      .form-group {
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .form-group label {
+        min-width: 140px;
+        font-weight: 500;
+        color: var(--text-secondary);
       }
       
       .form-control {
         flex: 1;
-        padding: 6px 8px;
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-      }
-      
-      input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-      }
-      
-      input[type="range"] {
-        margin-right: 10px;
-      }
-      
-      .hidden {
-        display: none !important;
-      }
-      
-      .visible {
-        display: block !important;
-      }
-      
-      /* Calculation button styles */
-      .calculate-button {
-        background-color: white;
-        color: var(--primary-color);
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-        padding: 8px 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        width: 100%;
-        margin-top: 10px;
-      }
-      
-      .calculate-button:hover {
-        background-color: var(--primary-color);
-        color: white;
-        border: 1px solid var(--light-grey);
-      }
-      
-      /* Results section styles */
-      .results-section {
-        margin-top: 16px;
-        background-color: white;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        transition: var(--transition);
+        background-color: var(--card-bg);
+        color: var(--text);
+        width: 100%;
+        outline: none;
       }
       
+      .form-control:focus {
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      }
+      
+      select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
+      }
+      
+      hr {
+        border: 0;
+        height: 1px;
+        background-color: var(--border);
+        margin: 20px 0;
+      }
+      
+      /* Buttons */
+      .btn {
+        display: inline-block;
+        padding: 10px 16px;
+        font-weight: 500;
+        text-align: center;
+        border-radius: 8px;
+        transition: var(--transition);
+        cursor: pointer;
+        width: 100%;
+        border: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      
+      /* Results Section */
+      .results-section {
+        padding: 20px;
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+        margin-top: 24px;
+        transition: var(--transition);
+        border: 1px solid var(--border);
+      }
       
       .results-section.fit-yes-border {
-        border: 1px solid #10b981; /* Green border when it fits */
+        border: 1px solid var(--success);
       }
       
       .results-section.fit-no-border {
-        border: 1px solid #ef4444; /* Red border when it doesn't fit */
+        border: 1px solid var(--error);
       }
       
       .result-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
       }
       
       .fit-indicator {
@@ -238,49 +266,73 @@
       }
       
       .fit-yes {
-        background-color: #10b981; /* Green */
+        background-color: var(--success);
       }
       
       .fit-no {
-        background-color: #ef4444; /* Red */
+        background-color: var(--error);
       }
       
       .result-summary {
-        margin-bottom: 16px;
+        margin-bottom: 20px;
       }
       
       .result-item {
         display: flex;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        align-items: center;
       }
       
       .result-label {
-        width: 140px;
+        min-width: 140px;
         font-weight: 500;
+        color: var(--text-secondary);
       }
       
       .result-value {
+        font-weight: 600;
         flex: 1;
-        font-weight: 500;
       }
       
+      .result-value.fit-yes-text {
+        color: var(--success);
+      }
+      
+      .result-value.fit-no-text {
+        color: var(--error);
+      }
+      
+      /* Details Section */
       .details-section {
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-        margin-bottom: 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
       }
       
       .details-header {
-        padding: 10px;
-        background-color: #f1f5f9;
+        padding: 12px 16px;
+        background-color: #f3f4f6;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        font-weight: 500;
+      }
+      
+      .toggle-icon {
+        transition: transform 0.3s ease;
+        display: inline-block;
+      }
+      
+      .toggle-icon.rotated {
+        transform: rotate(90deg);
       }
       
       .details-content {
-        padding: 10px;
+        padding: 16px;
         display: none;
+        border-top: 1px solid var(--border);
       }
       
       .details-content.expanded {
@@ -289,30 +341,81 @@
       
       .detail-item {
         display: flex;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
       
       .detail-label {
-        width: 140px;
+        min-width: 140px;
         font-weight: 500;
-        color: var(--text-color);
+        color: var(--text-secondary);
       }
       
       .detail-value {
         flex: 1;
       }
       
+      /* Suggestions */
       .suggestions-section {
-        margin-top: 16px;
-        border-top: 1px solid var(--light-grey);
-        padding-top: 16px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+      
+      .suggestion-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 12px;
       }
       
       .suggestion-item {
-        padding: 8px;
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-        margin-bottom: 8px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: var(--transition);
+      }
+      
+      .suggestion-item:hover {
+        border-color: var(--primary-light);
+        background-color: rgba(99, 102, 241, 0.05);
+      }
+      
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+      
+      .visible {
+        display: block !important;
+      }
+      
+      /* Footer */
+      .footer {
+        text-align: center;
+        margin-top: 24px;
+        padding: 16px 0;
+        color: var(--text-secondary);
+        font-size: 12px;
+      }
+      
+      .footer a {
+        color: var(--text-secondary);
+        text-decoration: underline;
+        transition: var(--transition);
+      }
+      
+      .footer a:hover {
+        color: var(--primary);
+      }
+      
+      /* Animations */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease forwards;
       }
     </style>
     <!-- Load JavaScript files -->
@@ -323,162 +426,174 @@
     <script src="sidepanel-init.js"></script>
   </head>
   <body>
-    <div class="header">
-      <img src="images/icon-128.png" alt="Nebul Logo">
-      <h1>VRAM Calculator</h1>
-    </div>
-    <!-- <div class="content">
-      <p>Nebul loves open-source models, but it can be pretty hard to figure out what hardware you need to run them.</p>
-      <p>This tool is originally designed to be used by ML engineers internally at Nebul.</p>
-      <p>But we thought it might be useful for others, so we've open-sourced it.</p>
-      <p>Please <a href="mailto:engineering@nebul.com">share your feedback</a> with us.</p>
-    </div> -->
-    
-    <div class="model-info">
-      <h2 class="model-info-header">Model Information</h2>
-      <img src="" alt="Developer Logo" class="meta-logo" id="developer-logo">
-      
-      <div class="info-item">
-        <div class="info-label">Developer:</div>
-        <div id="model-developer" class="info-value">
-          <span class="placeholder-text">Navigate to a model page...</span>
-        </div>
+    <div class="container">
+      <div class="header">
+        <img src="images/icon-128.png" alt="Nebul Logo">
+        <h1>VRAM Calculator</h1>
       </div>
       
-      <div class="info-item">
-        <div class="info-label">Name:</div>
-        <div id="model-name" class="info-value">
-          <span class="placeholder-text">Navigate to a model page...</span>
-        </div>
-      </div>
-      
-      <div class="info-item">
-        <div class="info-label">Size:</div>
-        <div id="model-size" class="info-value">
-          <span class="placeholder-text">Navigate to a model page...</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="custom-button-container">
-      <h2 class="model-info-header">Calculate necessary VRAM</h2>
-      
-      <div class="mode-selection">
-        <div class="mode-option selected" data-mode="inference">Inference</div>
-        <div class="mode-option" data-mode="fine-tuning">Fine-tuning</div>
-      </div>
-      
-      <div class="input-section">
-        <div id="inference-fields" class="visible">
-          <div class="input-group">
-            <label for="precision">Precision:</label>
-            <select id="precision" class="form-control">
-              <option value="FP32">FP32</option>
-              <option value="FP16">FP16</option>
-              <option value="BF16">BF16</option>
-              <option value="INT8">INT8</option>
-              <option value="Q8">Q8</option>
-              <option value="INT4">INT4</option>
-              <option value="Q4">Q4</option>
-              <option value="Q2">Q2</option>
-            </select>
-          </div>
-          
-          <div class="input-group">
-            <label for="batch-size">Batch Size:</label>
-            <input type="number" id="batch-size" class="form-control" value="1" min="1" max="64">
-          </div>
-          
-          <div class="input-group">
-            <label for="sequence-length">Sequence Length:</label>
-            <input type="number" id="sequence-length" class="form-control" value="2048" min="1" max="131072">
-          </div>
-          
-          <div class="input-group">
-            <label for="concurrent-requests">Concurrent Requests:</label>
-            <input type="number" id="concurrent-requests" class="form-control" value="1" min="1" max="100">
-          </div>
-          
-          <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--light-grey);">
-          
-          <div class="input-group">
-            <label for="gpu">GPU:</label>
-            <select id="gpu" class="form-control">
-              <option value="rtx-4090">RTX 4090</option>
-              <option value="l4">L4</option>
-              <option value="l40s" selected>L40S</option>
-              <option value="a100">A100</option>
-              <option value="h200">H200</option>
-              <option value="b200">B200</option>
-              <option value="jetson-orin-nano">Jetson Orin Nano</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label for="number-of-gpus">Number of GPUs:</label>
-            <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
-          </div>
-          
-          <div class="input-group">
-            <button id="calculate-button" class="calculate-button">Calculate VRAM</button>
-          </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Model Information</h2>
+          <img src="" alt="Developer Logo" id="developer-logo" style="height: 22px; display: none;">
         </div>
         
-        <div id="fine-tuning-fields" class="hidden">
-          
-          <div class="input-group">
-            <label for="fine-tuning-method">Fine-tuning Method:</label>
-            <select id="fine-tuning-method" class="form-control">
-              <option value="full">Full</option>
-              <option value="lora">LoRA</option>
-              <option value="qlora">QLoRA</option>
-            </select>
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-label">Developer</div>
+            <div id="model-developer" class="info-value">
+              <span class="placeholder-text">Navigate to a model page...</span>
+            </div>
           </div>
           
-          <div class="input-group">
-            <label for="ft-batch-size">Batch Size:</label>
-            <input type="number" id="ft-batch-size" class="form-control" value="1" min="1" max="64">
+          <div class="info-item">
+            <div class="info-label">Name</div>
+            <div id="model-name" class="info-value">
+              <span class="placeholder-text">Navigate to a model page...</span>
+            </div>
           </div>
           
-          <div class="input-group">
-            <label for="ft-sequence-length">Sequence Length:</label>
-            <input type="number" id="ft-sequence-length" class="form-control" value="2048" min="1" max="131072">
+          <div class="info-item">
+            <div class="info-label">Size</div>
+            <div id="model-size" class="info-value">
+              <span class="placeholder-text">Navigate to a model page...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Calculate necessary VRAM</h2>
+        </div>
+        
+        <div class="tabs mode-selection">
+          <div class="tab mode-option selected" data-mode="inference">Inference</div>
+          <div class="tab mode-option" data-mode="fine-tuning">Fine-tuning</div>
+        </div>
+        
+        <div class="form-section">
+          <div id="inference-fields" class="visible">
+            <div class="form-group">
+              <label for="precision">Precision</label>
+              <select id="precision" class="form-control">
+                <option value="FP32">FP32</option>
+                <option value="FP16">FP16</option>
+                <option value="BF16">BF16</option>
+                <option value="INT8">INT8</option>
+                <option value="Q8">Q8</option>
+                <option value="INT4">INT4</option>
+                <option value="Q4">Q4</option>
+                <option value="Q2">Q2</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="batch-size">Batch Size</label>
+              <input type="number" id="batch-size" class="form-control" value="1" min="1" max="64">
+            </div>
+            
+            <div class="form-group">
+              <label for="sequence-length">Sequence Length</label>
+              <input type="number" id="sequence-length" class="form-control" value="2048" min="1" max="131072">
+            </div>
+            
+            <div class="form-group">
+              <label for="concurrent-requests">Concurrent Requests</label>
+              <input type="number" id="concurrent-requests" class="form-control" value="1" min="1" max="100">
+            </div>
+            
+            <hr>
+            
+            <div class="form-group">
+              <label for="gpu">GPU</label>
+              <select id="gpu" class="form-control">
+                <option value="rtx-4090">RTX 4090</option>
+                <option value="l4">L4</option>
+                <option value="l40s" selected>L40S</option>
+                <option value="a100">A100</option>
+                <option value="h200">H200</option>
+                <option value="b200">B200</option>
+                <option value="jetson-orin-nano">Jetson Orin Nano</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="number-of-gpus">Number of GPUs</label>
+              <input type="number" id="number-of-gpus" class="form-control" value="1" min="1" max="64">
+            </div>
+            
+            <button id="calculate-button" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/>
+                <path d="M18.4 9.6a2.4 2.4 0 0 1 4.8 0v4.8a2.4 2.4 0 0 1-4.8 0"/>
+                <path d="M13.6 14.4a2.4 2.4 0 0 1-4.8 0V9.6a2.4 2.4 0 0 1 4.8 0"/>
+              </svg>
+              Calculate VRAM
+            </button>
           </div>
           
-          <div class="input-group">
-            <label for="grad-accum-steps">Grad. Accum. Steps:</label>
-            <input type="number" id="grad-accum-steps" class="form-control" value="1" min="1" max="32">
-          </div>
-          
-          <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--light-grey);">
-          
-          <div class="input-group">
-            <label for="ft-gpu">GPU:</label>
-            <select id="ft-gpu" class="form-control">
-              <option value="rtx-4090">RTX 4090</option>
-              <option value="l4">L4</option>
-              <option value="l40s" selected>L40S</option>
-              <option value="a100">A100</option>
-              <option value="h200">H200</option>
-              <option value="b200">B200</option>
-              <option value="jetson-orin-nano">Jetson Orin Nano</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label for="ft-number-of-gpus">Number of GPUs:</label>
-            <input type="number" id="ft-number-of-gpus" class="form-control" value="1" min="1" max="64">
-          </div>
-          
-          <div class="input-group">
-            <button id="ft-calculate-button" class="calculate-button">Calculate VRAM</button>
+          <div id="fine-tuning-fields" class="hidden">
+            <div class="form-group">
+              <label for="fine-tuning-method">Fine-tuning Method</label>
+              <select id="fine-tuning-method" class="form-control">
+                <option value="full">Full</option>
+                <option value="lora">LoRA</option>
+                <option value="qlora">QLoRA</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="ft-batch-size">Batch Size</label>
+              <input type="number" id="ft-batch-size" class="form-control" value="1" min="1" max="64">
+            </div>
+            
+            <div class="form-group">
+              <label for="ft-sequence-length">Sequence Length</label>
+              <input type="number" id="ft-sequence-length" class="form-control" value="2048" min="1" max="131072">
+            </div>
+            
+            <div class="form-group">
+              <label for="grad-accum-steps">Grad. Accum. Steps</label>
+              <input type="number" id="grad-accum-steps" class="form-control" value="1" min="1" max="32">
+            </div>
+            
+            <hr>
+            
+            <div class="form-group">
+              <label for="ft-gpu">GPU</label>
+              <select id="ft-gpu" class="form-control">
+                <option value="rtx-4090">RTX 4090</option>
+                <option value="l4">L4</option>
+                <option value="l40s" selected>L40S</option>
+                <option value="a100">A100</option>
+                <option value="h200">H200</option>
+                <option value="b200">B200</option>
+                <option value="jetson-orin-nano">Jetson Orin Nano</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="ft-number-of-gpus">Number of GPUs</label>
+              <input type="number" id="ft-number-of-gpus" class="form-control" value="1" min="1" max="64">
+            </div>
+            
+            <button id="ft-calculate-button" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/>
+                <path d="M18.4 9.6a2.4 2.4 0 0 1 4.8 0v4.8a2.4 2.4 0 0 1-4.8 0"/>
+                <path d="M13.6 14.4a2.4 2.4 0 0 1-4.8 0V9.6a2.4 2.4 0 0 1 4.8 0"/>
+              </svg>
+              Calculate VRAM
+            </button>
           </div>
         </div>
       </div>
       
       <!-- Results Section - Hidden initially -->
-      <div class="results-section hidden" id="calc-results">
+      <div class="results-section hidden animate-fadeIn" id="calc-results">
         <div class="result-header">
-          <h3>VRAM Requirements</h3>
+          <h3 class="card-title">VRAM Requirements</h3>
           <div id="will-it-fit-indicator" class="fit-indicator"></div>
         </div>
         
@@ -488,15 +603,15 @@
             <div id="will-it-fit" class="result-value"></div>
           </div>
           <div class="result-item">
-            <div class="result-label">Needed VRAM:</div>
+            <div class="result-label">Needed VRAM</div>
             <div id="needed-vram" class="result-value"></div>
           </div>
           <div class="result-item">
-            <div class="result-label">VRAM Usage:</div>
+            <div class="result-label">VRAM Usage</div>
             <div id="vram-usage-percent" class="result-value"></div>
           </div>
           <div class="result-item">
-            <div class="result-label">Available VRAM:</div>
+            <div class="result-label">Available VRAM</div>
             <div id="available-vram" class="result-value"></div>
           </div>
         </div>
@@ -504,7 +619,6 @@
         <div class="details-section">
           <div class="details-header" id="details-toggle">
             <span>Details</span>
-          
             <span class="toggle-icon">&#8594;</span>
           </div>
           <div class="details-content" id="details-content">
@@ -513,17 +627,62 @@
         </div>
         
         <div class="suggestions-section hidden" id="suggestions-section">
-          <h4>Suggested Configurations:</h4>
+          <h4 class="suggestion-title">Suggested Configurations</h4>
           <div id="suggestions-content">
             <!-- Suggestions will be populated by JavaScript -->
           </div>
         </div>
       </div>
+      
+      <!-- Footer with "Powered by Nebul" text -->
+      <div class="footer">
+        Powered by <a href="https://nebul.com" target="_blank">Nebul</a>
+      </div>
     </div>
     
-    <!-- Footer with "Powered by Nebul" text -->
-    <div class="footer" style="text-align: center; margin-top: 16px; padding: 8px 0;">
-      <span style="color: #71717a; font-size: 0.9em;">Powered by <a href="https://nebul.com" style="color: #71717a; text-decoration: underline;">Nebul</a></span>
-    </div>
+    <script>
+      // This script adds the toggle functionality for the details section
+      document.addEventListener('DOMContentLoaded', function() {
+        const detailsToggle = document.getElementById('details-toggle');
+        const detailsContent = document.getElementById('details-content');
+        
+        if (detailsToggle && detailsContent) {
+          detailsToggle.addEventListener('click', function() {
+            detailsContent.classList.toggle('expanded');
+            const icon = detailsToggle.querySelector('.toggle-icon');
+            if (detailsContent.classList.contains('expanded')) {
+              icon.classList.add('rotated');
+            } else {
+              icon.classList.remove('rotated');
+            }
+          });
+        }
+        
+        // Create a simpler function to handle tab styling
+        // Override the original switchMode function to also handle tab styling
+        const originalSwitchMode = window.switchMode;
+        window.switchMode = function(mode) {
+          // First call the original function
+          if (originalSwitchMode) {
+            originalSwitchMode(mode);
+          }
+          
+          // Then update the active class for styling
+          document.querySelectorAll('.tab').forEach(tab => {
+            if (tab.getAttribute('data-mode') === mode) {
+              tab.classList.add('active');
+            } else {
+              tab.classList.remove('active');
+            }
+          });
+        };
+        
+        
+        // Apply the active class to the initially selected tab
+        document.querySelectorAll('.tab.selected').forEach(tab => {
+          tab.classList.add('active');
+        });
+      });
+    </script>
   </body>
 </html>

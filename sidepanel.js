@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ftCalculateButton = document.getElementById('ft-calculate-button');
   
   // Set up tabs functionality
-  const inferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
-  const finetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+  const inferenceTab = document.querySelector('.tab[data-mode="inference"]');
+  const finetuningTab = document.querySelector('.tab[data-mode="fine-tuning"]');
   
   if (inferenceTab && finetuningTab) {
     inferenceTab.addEventListener('click', () => {
@@ -60,28 +60,74 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+  } else {
+    console.warn('Tab elements not found with new selectors, trying legacy selectors');
+    
+    // Fallback to legacy selectors
+    const legacyInferenceTab = document.querySelector('.mode-option[data-mode="inference"]');
+    const legacyFinetuningTab = document.querySelector('.mode-option[data-mode="fine-tuning"]');
+    
+    if (legacyInferenceTab && legacyFinetuningTab) {
+      console.log('Found tabs using legacy selectors');
+      
+      legacyInferenceTab.addEventListener('click', () => {
+        chrome.storage.session.get(['modelInfo'], (result) => {
+          if (result.modelInfo && result.modelInfo.onModelPage === false) {
+            showWelcomeUI();
+          } else {
+            handleTabChange('inference');
+          }
+        });
+      });
+      
+      legacyFinetuningTab.addEventListener('click', () => {
+        chrome.storage.session.get(['modelInfo'], (result) => {
+          if (result.modelInfo && result.modelInfo.onModelPage === false) {
+            showWelcomeUI();
+          } else {
+            handleTabChange('fine-tuning');
+          }
+        });
+      });
+    }
   }
   
   function handleTabChange(mode) {
+    // Get the tab elements - updated selectors for new HTML structure
+    const inferenceTab = document.querySelector('.tab[data-mode="inference"]');
+    const finetuningTab = document.querySelector('.tab[data-mode="fine-tuning"]');
+    
+    // Get the content elements
+    const inferenceContent = document.getElementById('inference-fields');
+    const finetuningContent = document.getElementById('fine-tuning-fields');
+    
     // Update tab UI state
     if (mode === 'inference') {
-      inferenceTab.classList.add('selected');
-      finetuningTab.classList.remove('selected');
+      if (inferenceTab) {
+        inferenceTab.classList.add('selected', 'active');
+        finetuningTab.classList.remove('selected', 'active');
+      }
       
       // Show inference content, hide fine-tuning content
-      document.getElementById('inference-fields').classList.remove('hidden');
-      document.getElementById('inference-fields').classList.add('visible');
-      document.getElementById('fine-tuning-fields').classList.remove('visible');
-      document.getElementById('fine-tuning-fields').classList.add('hidden');
+      if (inferenceContent && finetuningContent) {
+        inferenceContent.classList.remove('hidden');
+        inferenceContent.classList.add('visible');
+        finetuningContent.classList.remove('visible');
+        finetuningContent.classList.add('hidden');
+      }
     } else {
-      finetuningTab.classList.add('selected');
-      inferenceTab.classList.remove('selected');
+      if (finetuningTab) {
+        finetuningTab.classList.add('selected', 'active');
+        inferenceTab.classList.remove('selected', 'active');
+      }
       
       // Show fine-tuning content, hide inference content
-      document.getElementById('fine-tuning-fields').classList.remove('hidden');
-      document.getElementById('fine-tuning-fields').classList.add('visible');
-      document.getElementById('inference-fields').classList.remove('visible');
-      document.getElementById('inference-fields').classList.add('hidden');
+      if (inferenceContent && finetuningContent) {
+        finetuningContent.classList.remove('hidden');
+        finetuningContent.classList.add('visible');
+        inferenceContent.classList.remove('visible');
+        inferenceContent.classList.add('hidden');
+      }
     }
   }
   
@@ -151,31 +197,74 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Function to show the welcome UI when not on a model page
   function showWelcomeUI() {
-    // Get references to the model info and calculation cards
-    const modelInfoCard = document.querySelector('.model-info');
-    const calculationCard = document.querySelector('.custom-button-container');
+    console.log('Showing welcome UI');
+    
+    // Get references to the model info and calculation cards using the new structure
+    const modelInfoCard = document.querySelector('.card:nth-child(2)'); // First card after header
+    const calculationCard = document.querySelector('.card:nth-child(3)'); // Second card after header
+    const resultsSection = document.getElementById('calc-results');
     const welcomeCard = document.getElementById('welcome-card');
     
-    // Hide model info and calculation cards
-    if (modelInfoCard) modelInfoCard.style.display = 'none';
-    if (calculationCard) calculationCard.style.display = 'none';
+    // Debug logs
+    console.log('UI Elements:', {
+      modelInfoCard: modelInfoCard ? 'found' : 'not found',
+      calculationCard: calculationCard ? 'found' : 'not found',
+      resultsSection: resultsSection ? 'found' : 'not found',
+      welcomeCard: welcomeCard ? 'found' : 'not found',
+      allCards: document.querySelectorAll('.card').length + ' cards found'
+    });
+    
+    // Try alternative selectors for cards if the first attempt failed
+    if (!modelInfoCard || !calculationCard) {
+      const allCards = document.querySelectorAll('.card');
+      console.log('Using alternative card selection, found', allCards.length, 'cards');
+      
+      if (allCards.length >= 2) {
+        // Hide all cards
+        allCards.forEach((card, index) => {
+          if (index > 0) { // Skip the first one if it's the welcome card
+            card.style.display = 'none';
+          }
+        });
+      }
+    } else {
+      // Hide model info and calculation cards
+      modelInfoCard.style.display = 'none';
+      calculationCard.style.display = 'none';
+    }
+    
+    if (resultsSection) resultsSection.classList.add('hidden');
     
     // If welcome card doesn't exist, create it
     if (!welcomeCard) {
       const newWelcomeCard = document.createElement('div');
       newWelcomeCard.id = 'welcome-card';
-      newWelcomeCard.className = 'welcome-card';
+      newWelcomeCard.className = 'card animate-fadeIn';
       newWelcomeCard.innerHTML = `
-        <h2 class="welcome-header">Welcome to VRAM Calculator</h2>
-        <p>This extension helps you calculate the GPU VRAM requirements for running AI models.</p>
-        <p>Navigate to any <a href="https://huggingface.co/models" target="_blank">model page on Hugging Face</a> to analyze VRAM needs for inference or fine-tuning.</p>
+        <div class="card-header">
+          <h2 class="card-title">Welcome to VRAM Calculator</h2>
+        </div>
+        <p style="margin-bottom: 12px;">This extension helps you calculate the GPU VRAM requirements for running AI models.</p>
+        <p style="margin-bottom: 12px;">Navigate to any <a href="https://huggingface.co/models" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 500;">model page on Hugging Face</a> to analyze VRAM needs for inference or fine-tuning.</p>
       `;
       
       // Insert after the header
+      const container = document.querySelector('.container');
       const header = document.querySelector('.header');
-      if (header) {
-        header.after(newWelcomeCard);
+      
+      if (header && header.parentNode) {
+        console.log('Inserting welcome card after header');
+        // Try to insert at the beginning of the container
+        if (container && container.firstChild) {
+          container.insertBefore(newWelcomeCard, container.firstChild.nextSibling);
+        } else {
+          header.parentNode.insertBefore(newWelcomeCard, modelInfoCard || header.nextSibling);
+        }
+      } else if (container) {
+        console.log('Inserting welcome card at the beginning of container');
+        container.insertBefore(newWelcomeCard, container.firstChild);
       } else {
+        console.log('Fallback: Appending welcome card to body');
         document.body.appendChild(newWelcomeCard);
       }
     } else {
@@ -186,27 +275,64 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Function to show the model info UI when on a model page
   function showModelInfoUI() {
+    console.log('Showing model info UI');
+    
     // Get references to the model info and calculation cards
-    const modelInfoCard = document.querySelector('.model-info');
-    const calculationCard = document.querySelector('.custom-button-container');
+    const modelInfoCard = document.querySelector('.card:nth-child(2)'); // First card after header
+    const calculationCard = document.querySelector('.card:nth-child(3)'); // Second card after header
     const welcomeCard = document.getElementById('welcome-card');
     
-    // Show model info and calculation cards
-    if (modelInfoCard) modelInfoCard.style.display = 'block';
-    if (calculationCard) calculationCard.style.display = 'block';
+    // Debug logs
+    console.log('UI Elements for Model Info:', {
+      modelInfoCard: modelInfoCard ? 'found' : 'not found',
+      calculationCard: calculationCard ? 'found' : 'not found',
+      welcomeCard: welcomeCard ? 'found' : 'not found',
+      allCards: document.querySelectorAll('.card').length + ' cards found'
+    });
+    
+    // Try alternative selectors for cards if the first attempt failed
+    if (!modelInfoCard || !calculationCard) {
+      const allCards = document.querySelectorAll('.card');
+      console.log('Using alternative card selection for model UI, found', allCards.length, 'cards');
+      
+      if (allCards.length >= 2) {
+        // Show all cards except welcome card
+        allCards.forEach(card => {
+          if (card.id !== 'welcome-card') {
+            card.style.display = 'block';
+          }
+        });
+      }
+    } else {
+      // Show model info and calculation cards
+      modelInfoCard.style.display = 'block';
+      calculationCard.style.display = 'block';
+    }
     
     // Hide the welcome card if it exists
     if (welcomeCard) welcomeCard.style.display = 'none';
   }
   
-  // Check if there's already model info in storage
-  chrome.storage.session.get(['modelInfo'], (result) => {
-    if (result.modelInfo) {
-      updateModelInfoUI(result.modelInfo);
-    } else {
-      // If no model info, default to welcome UI
-      showWelcomeUI();
-    }
+  // Make sure all js files have finished loading
+  window.addEventListener('load', () => {
+    console.log('Window fully loaded');
+    
+    // Trigger initial UI check after all scripts are loaded
+    chrome.storage.session.get(['modelInfo'], (result) => {
+      if (result.modelInfo) {
+        // If we have model info, check if we're on a model page
+        if (result.modelInfo.onModelPage === false) {
+          // If not on a model page, show the welcome UI
+          showWelcomeUI();
+        } else {
+          // If on a model page, show the model info
+          updateModelInfoUI(result.modelInfo);
+        }
+      } else {
+        // If no model info, default to welcome UI
+        showWelcomeUI();
+      }
+    });
   });
   
   // Check if this was opened from a deployment or fine-tune request
@@ -561,4 +687,52 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsSection.classList.add('hidden');
     }
   }
+  
+  // Initialize tab switcher and ensure it's compatible with mode-switcher.js
+  function initializeTabSwitcher() {
+    console.log('Initializing tab switcher');
+    
+    // Try both selectors for maximum compatibility with different versions
+    const tabElements = document.querySelectorAll('.tab[data-mode], .mode-option[data-mode]');
+    
+    if (tabElements && tabElements.length > 0) {
+      console.log(`Found ${tabElements.length} tab elements`);
+      
+      // Make sure the tab click events use our logic for handling model page state
+      tabElements.forEach(tab => {
+        // Replace any existing click handlers by using a new clone of the element
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
+        
+        newTab.addEventListener('click', () => {
+          const mode = newTab.getAttribute('data-mode');
+          console.log(`Tab clicked: ${mode}`);
+          
+          // Check if we're on a model page before showing the tab
+          chrome.storage.session.get(['modelInfo'], (result) => {
+            if (result.modelInfo && result.modelInfo.onModelPage === false) {
+              // If not on a model page, don't change anything, just keep showing welcome message
+              showWelcomeUI();
+            } else {
+              // If on a model page, switch to the selected tab
+              handleTabChange(mode);
+              
+              // Also call the window.switchMode function if it exists (from mode-switcher.js)
+              if (typeof window.switchMode === 'function') {
+                window.switchMode(mode);
+              }
+            }
+          });
+        });
+      });
+    } else {
+      console.warn('No tab elements found for initialization');
+    }
+  }
+  
+  // Call tab initialization after window load
+  window.addEventListener('load', () => {
+    // Wait a bit to ensure all other scripts have loaded and initialized their event handlers
+    setTimeout(initializeTabSwitcher, 100);
+  });
 });
