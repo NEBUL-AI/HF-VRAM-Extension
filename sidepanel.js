@@ -249,13 +249,13 @@ document.addEventListener('DOMContentLoaded', () => {
       sendResponse({ received: true });
     }
     
-    // Handle fine-tune requests
+    // Handle fine-tuning requests
     if (message.action === 'finetuneRequested') {
       handleTabChange('fine-tuning');
       sendResponse({ received: true });
     }
     
-    return true; // Keep the messaging channel open for async responses
+    return true;
   });
   
   // Add click handler for the calculate button (inference)

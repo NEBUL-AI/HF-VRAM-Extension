@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Nebul GenAI Service Worker
+// 
+// This script handles messages from content scripts and manages the side panel state.
+//
+// Message actions:
+// - openSidePanel: Opens or closes the side panel for a tab
+//   - If neverClose flag is set, the panel will always open and never close
+//   - Used by dropdown menu buttons to open specific tabs without toggling
+// - updateModelInfo: Updates model information stored in session storage
+// - closeSidePanel: Closes the side panel for a tab
+
 // Track open sidepanels by tabId
 const openSidePanels = new Map();
 
@@ -36,8 +47,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Check if the sidepanel is already open for this tab
     const tabId = sender.tab.id;
     
-    if (openSidePanels.get(tabId)) {
-      // Panel is open, send close message to the panel
+    // Check if we have the neverClose flag - if present, we'll always open, never close
+    const shouldNeverClose = message.data && message.data.neverClose;
+    
+    if (openSidePanels.get(tabId) && !shouldNeverClose) {
+      // Panel is open, send close message to the panel ONLY if neverClose flag is not set
       try {
         chrome.runtime.sendMessage({ action: 'closeSidePanel', tabId });
         openSidePanels.set(tabId, false);

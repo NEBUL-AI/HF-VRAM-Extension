@@ -433,18 +433,21 @@
                             `;
                             document.head.appendChild(style);
                             
-                            // Add click event listener for fine-tuning tab
+                            // Add click event listener for fine-tuning tab - MODIFIED TO ALWAYS OPEN THE PANEL
                             nebulOption.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 try {
                                     if (isExtensionContextValid()) {
-                                        // Toggle side panel with fine-tuning request
+                                        // Always open side panel with fine-tuning request, never close
                                         chrome.runtime.sendMessage({ 
                                             action: 'openSidePanel',
-                                            data: { finetuneRequest: true }
+                                            data: { 
+                                                finetuneRequest: true,
+                                                neverClose: true  // New flag to indicate this should never close the panel
+                                            }
                                         }, (response) => {
                                             if (response && response.success) {
-                                                console.log(response.wasOpen ? 'Closed VRAM fine-tuning panel' : 'Opened VRAM fine-tuning panel');
+                                                console.log('Opened VRAM fine-tuning panel');
                                             }
                                         });
                                     }
@@ -474,18 +477,21 @@
                                 return;
                             }
                             
-                            // Add click event listener for deployment
+                            // Add click event listener for deployment - MODIFIED TO ALWAYS OPEN THE PANEL
                             nebulOption.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 try {
                                     if (isExtensionContextValid()) {
-                                        // Toggle side panel with deployment info
+                                        // Always open side panel with deployment info, never close
                                         chrome.runtime.sendMessage({ 
                                             action: 'openSidePanel',
-                                            data: { deploymentRequest: true }
+                                            data: { 
+                                                deploymentRequest: true,
+                                                neverClose: true  // New flag to indicate this should never close the panel
+                                            }
                                         }, (response) => {
                                             if (response && response.success) {
-                                                console.log(response.wasOpen ? 'Closed VRAM deployment panel' : 'Opened VRAM deployment panel');
+                                                console.log('Opened VRAM deployment panel');
                                             }
                                         });
                                     }
