@@ -287,13 +287,18 @@
                     nebulItem.addEventListener('click', (e) => {
                         e.preventDefault();
                         try {
-                            // Send message to background service worker to open the side panel
+                            // Send message to background service worker to toggle the side panel
                             if (isExtensionContextValid()) {
-                                chrome.runtime.sendMessage({ action: 'openSidePanel' });
-                                console.log('Requested to open Nebul side panel');
+                                chrome.runtime.sendMessage({ action: 'openSidePanel' }, (response) => {
+                                    if (response && response.success) {
+                                        console.log(response.wasOpen ? 'Requested to close Nebul side panel' : 'Requested to open Nebul side panel');
+                                    } else {
+                                        console.error('Error toggling side panel:', response ? response.error : 'Unknown error');
+                                    }
+                                });
                             }
                         } catch (error) {
-                            console.error('Error sending message to open side panel:', error);
+                            console.error('Error sending message to toggle side panel:', error);
                         }
                     });
                     
@@ -369,12 +374,15 @@
                                 e.preventDefault();
                                 try {
                                     if (isExtensionContextValid()) {
-                                        // Open side panel with fine-tuning request
+                                        // Toggle side panel with fine-tuning request
                                         chrome.runtime.sendMessage({ 
                                             action: 'openSidePanel',
                                             data: { finetuneRequest: true }
+                                        }, (response) => {
+                                            if (response && response.success) {
+                                                console.log(response.wasOpen ? 'Closed Nebul fine-tuning panel' : 'Opened Nebul fine-tuning panel');
+                                            }
                                         });
-                                        console.log('Nebul fine-tuning option clicked');
                                     }
                                 } catch (error) {
                                     console.error('Error sending fine-tune message:', error);
@@ -407,12 +415,15 @@
                                 e.preventDefault();
                                 try {
                                     if (isExtensionContextValid()) {
-                                        // Open side panel with deployment info
+                                        // Toggle side panel with deployment info
                                         chrome.runtime.sendMessage({ 
                                             action: 'openSidePanel',
                                             data: { deploymentRequest: true }
+                                        }, (response) => {
+                                            if (response && response.success) {
+                                                console.log(response.wasOpen ? 'Closed Nebul deployment panel' : 'Opened Nebul deployment panel');
+                                            }
                                         });
-                                        console.log('Nebul deployment option clicked');
                                     }
                                 } catch (error) {
                                     console.error('Error sending deployment message:', error);

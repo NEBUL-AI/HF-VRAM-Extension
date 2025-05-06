@@ -177,6 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Message received in side panel:', message);
     
+    // Handle close request
+    if (message.action === 'closeSidePanel') {
+      console.log('Closing side panel');
+      // Use window.close() to close the side panel
+      window.close();
+      return true;
+    }
+    
     // Handle model info updates
     if (message.action === 'modelInfoUpdated') {
       updateModelInfoUI(message.data);
