@@ -1,8 +1,8 @@
 {
-    "name": "Nebul GenAI",
-    "version": "0.3",
+    "name": "Hugging Face VRAM Calculator",
+    "version": "0.4",
     "manifest_version": 3,
-    "description": "Nebul GenAI",
+    "description": "The best VRAM Calculator for Hugging Face models",
     "background": {
         "service_worker": "service-worker.js"
     },
