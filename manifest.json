@@ -1,6 +1,6 @@
 {
     "name": "Nebul GenAI",
-    "version": "0.2",
+    "version": "0.3",
     "manifest_version": 3,
     "description": "Nebul GenAI",
     "background": {
