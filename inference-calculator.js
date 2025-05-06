@@ -48,7 +48,8 @@ const COMMON_GPUS = {
   "l40s": 48,
   "a100": 80,
   "h200": 141,
-  "b200": 96
+  "b200": 96,
+  "jetson-orin-nano": 8
 };
 
 // Function to get closest architecture based on parameter count
