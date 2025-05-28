@@ -1,6 +1,6 @@
 {
     "name": "Hugging Face VRAM Calculator",
-    "version": "0.4",
+    "version": "0.5",
     "manifest_version": 3,
     "description": "The best VRAM Calculator for Hugging Face models",
     "background": {
