@@ -37,6 +37,7 @@ const COMMON_GPUS = {
   "RTX 4070": 12,
   "RTX 4080": 16,
   "RTX 4090": 24,
+  "RTX 5090": 32,
   "RTX 6000": 48,
   "A100-40G": 40,
   "A100-80G": 80,
@@ -44,6 +45,7 @@ const COMMON_GPUS = {
   "H200": 141,
   // Map UI values to VRAM sizes
   "rtx-4090": 24,
+  "rtx-5090": 32,
   "l4": 24,
   "l40s": 48,
   "a100": 80,
