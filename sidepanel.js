@@ -136,6 +136,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   
+  // Security function to sanitize user input and prevent XSS attacks
+  function sanitizeText(text) {
+    if (!text || typeof text !== 'string') {
+      return '';
+    }
+    
+    // Remove any HTML tags and decode HTML entities
+    const temp = document.createElement('div');
+    temp.textContent = text;
+    return temp.textContent.trim();
+  }
+  
+  // Security function to validate and sanitize URLs
+  function sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') {
+      return '';
+    }
+    
+    try {
+      const urlObj = new URL(url);
+      // Only allow https URLs from trusted domains
+      if (urlObj.protocol === 'https:' && 
+          (urlObj.hostname.endsWith('huggingface.co') || 
+           urlObj.hostname.endsWith('hf.co') ||
+           urlObj.hostname.endsWith('amazonaws.com'))) { // AWS S3 for HF images
+        return url;
+      }
+    } catch (e) {
+      // Invalid URL
+    }
+    
+    return ''; // Return empty string for invalid/untrusted URLs
+  }
+  
   // Function to update the model info UI
   function updateModelInfoUI(modelInfo) {
     if (modelInfo) {
@@ -149,16 +183,20 @@ document.addEventListener('DOMContentLoaded', () => {
       // We're on a model page, show the model info
       showModelInfoUI();
       
-      // Update model name
+      // Update model name - use textContent to prevent XSS
       if (modelInfo.modelName) {
-        modelNameElement.innerHTML = `<span>${modelInfo.modelName}</span>`;
+        const sanitizedModelName = sanitizeText(modelInfo.modelName);
+        modelNameElement.innerHTML = `<span></span>`;
+        modelNameElement.querySelector('span').textContent = sanitizedModelName;
       } else {
         modelNameElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }
       
-      // Update developer name
+      // Update developer name - use textContent to prevent XSS
       if (modelInfo.developerName) {
-        modelDeveloperElement.innerHTML = `<span>${modelInfo.developerName}</span>`;
+        const sanitizedDeveloperName = sanitizeText(modelInfo.developerName);
+        modelDeveloperElement.innerHTML = `<span></span>`;
+        modelDeveloperElement.querySelector('span').textContent = sanitizedDeveloperName;
         
         // Show developer logo if available
         const developerLogo = document.getElementById('developer-logo');
@@ -167,10 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
         developerLogo.style.display = 'none';
         
         if (modelInfo.developerLogoUrl) {
-          // Display the developer logo if available
-          developerLogo.src = modelInfo.developerLogoUrl;
-          developerLogo.alt = `${modelInfo.developerName} Logo`;
-          developerLogo.style.display = 'block';
+          // Validate and sanitize the logo URL
+          const sanitizedLogoUrl = sanitizeUrl(modelInfo.developerLogoUrl);
+          if (sanitizedLogoUrl) {
+            // Display the developer logo if URL is valid and from trusted domain
+            developerLogo.src = sanitizedLogoUrl;
+            developerLogo.alt = sanitizeText(modelInfo.developerName) + ' Logo';
+            developerLogo.style.display = 'block';
+          }
         }
       } else {
         modelDeveloperElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
@@ -180,7 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Update model size - show both human-readable and exact parameter count
       if (modelInfo.modelSize) {
-        let sizeDisplay = `<span>${modelInfo.modelSize}</span>`;
+        const sanitizedModelSize = sanitizeText(modelInfo.modelSize);
+        let sizeDisplay = `<span></span>`;
         
         // Add the integer representation if available
         if (modelInfo.modelSizeInt && modelInfo.modelSizeInt > 0) {
@@ -189,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         modelSizeElement.innerHTML = sizeDisplay;
+        modelSizeElement.querySelector('span').textContent = sanitizedModelSize;
       } else {
         modelSizeElement.innerHTML = `<span class="placeholder-text">Not available</span>`;
       }

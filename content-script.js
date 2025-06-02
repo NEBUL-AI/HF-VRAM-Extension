@@ -5,6 +5,20 @@
     // Store the last URL to detect navigation
     let lastUrl = window.location.href;
     
+    // Security function to sanitize extracted text
+    function sanitizeExtractedText(text) {
+        if (!text || typeof text !== 'string') {
+            return '';
+        }
+        
+        // Trim whitespace and remove any potential control characters
+        const sanitized = text.trim().replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+        
+        // Limit length to prevent extremely long strings
+        const maxLength = 200;
+        return sanitized.length > maxLength ? sanitized.substring(0, maxLength) + '...' : sanitized;
+    }
+
     // Helper function to check if extension context is valid
     function isExtensionContextValid() {
         try {
@@ -116,7 +130,7 @@
         let modelName = '';
         const modelNameElement = document.querySelector('h1 div.max-w-full a.font-mono.font-semibold');
         if (modelNameElement) {
-            modelName = modelNameElement.textContent.trim();
+            modelName = sanitizeExtractedText(modelNameElement.textContent);
         }
         
         // Extract developer name based on the example HTML structure
@@ -124,7 +138,7 @@
         // Try to find the developer using the class structure from the example
         const developerElement = document.querySelector('h1 div.group.flex.flex-none.items-center a[href^="/"]');
         if (developerElement) {
-            developerName = developerElement.textContent.trim();
+            developerName = sanitizeExtractedText(developerElement.textContent);
         }
         
         // Extract developer logo image URL
@@ -132,7 +146,18 @@
         // Try to find the developer logo image from the example structure
         const developerLogoElement = document.querySelector('h1 div.group.flex.flex-none.items-center img');
         if (developerLogoElement && developerLogoElement.src) {
-            developerLogoUrl = developerLogoElement.src;
+            // Basic URL validation - only allow HTTPS URLs from trusted domains
+            try {
+                const url = new URL(developerLogoElement.src);
+                if (url.protocol === 'https:' && 
+                    (url.hostname.endsWith('huggingface.co') || 
+                     url.hostname.endsWith('hf.co') ||
+                     url.hostname.endsWith('amazonaws.com'))) {
+                    developerLogoUrl = developerLogoElement.src;
+                }
+            } catch (e) {
+                // Invalid URL, ignore
+            }
         }
         
         // Fallback approach if the first method doesn't work
@@ -144,12 +169,22 @@
                 if (elem.textContent.includes('/')) continue;
                 
                 // Get the developer name
-                developerName = elem.textContent.trim();
+                developerName = sanitizeExtractedText(elem.textContent);
                 // Try to find an associated image
                 if (developerName && !developerLogoUrl) {
                     const img = elem.querySelector('img');
                     if (img && img.src) {
-                        developerLogoUrl = img.src;
+                        try {
+                            const url = new URL(img.src);
+                            if (url.protocol === 'https:' && 
+                                (url.hostname.endsWith('huggingface.co') || 
+                                 url.hostname.endsWith('hf.co') ||
+                                 url.hostname.endsWith('amazonaws.com'))) {
+                                developerLogoUrl = img.src;
+                            }
+                        } catch (e) {
+                            // Invalid URL, ignore
+                        }
                     }
                 }
                 if (developerName) break;
@@ -162,7 +197,7 @@
             // URL format is typically /{organization}/{model-name}
             const pathParts = urlPath.split('/').filter(part => part.trim() !== '');
             if (pathParts.length >= 2) {
-                developerName = pathParts[0];
+                developerName = sanitizeExtractedText(pathParts[0]);
             }
         }
         
@@ -176,7 +211,7 @@
                 if (labelDiv && labelDiv.textContent.trim() === 'Model size') {
                     const sizeDiv = element.querySelector('div.px-1\\.5');
                     if (sizeDiv) {
-                        modelSize = sizeDiv.textContent.trim();
+                        modelSize = sanitizeExtractedText(sizeDiv.textContent);
                         modelSizeInt = convertModelSizeToInt(modelSize);
                     }
                 }
@@ -199,7 +234,7 @@
             // Look in page tags for parameter information
             const tagElements = document.querySelectorAll('.inline-flex.h-6');
             tagElements.forEach(tagElem => {
-                const tagText = tagElem.textContent.toLowerCase();
+                const tagText = sanitizeExtractedText(tagElem.textContent).toLowerCase();
                 if (tagText.includes('param') && !tagText.includes('model size')) {
                     const paramMatch = tagText.match(/(\d+\.?\d*)([kmbt])?/i);
                     if (paramMatch) {
@@ -236,7 +271,7 @@
         if (modelSizeInt === 0) {
             const descriptionElement = document.querySelector('.prose');
             if (descriptionElement) {
-                const descText = descriptionElement.textContent.toLowerCase();
+                const descText = sanitizeExtractedText(descriptionElement.textContent).toLowerCase();
                 const paramMatches = descText.match(/(\d+\.?\d*)[\s-]?([kmbt])[\s-]?(?:illion)?[\s-]?param/i);
                 if (paramMatches) {
                     const value = parseFloat(paramMatches[1]);
