@@ -10,6 +10,28 @@
 </div>
 A Chrome extension that helps you determine the hardware requirements for running LLMs and AI models from Hugging Face.
 
+## 📈 Star History
+
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="
+      https://api.star-history.com/svg?repos=NEBUL-AI/HF-VRAM-Extension&type=Date&theme=dark
+    "
+  />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="
+      https://api.star-history.com/svg?repos=NEBUL-AI/HF-VRAM-Extension&type=Date
+    "
+  />
+  <img
+    alt="Star History Chart"
+    src="https://api.star-history.com/svg?repos=NEBUL-AI/HF-VRAM-Extension&type=Date"
+  />
+</picture>
+
+
 
 ---
 
