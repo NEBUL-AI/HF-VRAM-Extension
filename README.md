@@ -111,8 +111,8 @@ Since this is a Beta version, your feedback is invaluable! Please help us improv
 
 - 🐛 [Reporting bugs](https://github.com/NEBUL-AI/HF-VRAM-Extension/issues)
 - 💡 [Suggesting features](https://github.com/NEBUL-AI/HF-VRAM-Extension/issues)
-- ⭐ Rating the extension on the Chrome Web Store
-- 📧 Reaching out to the Nebul AI Team
+- ⭐ [Rate the extension on the Chrome Web Store](https://chromewebstore.google.com/detail/hugging-face-vram-calcula/bioohacjdieeliinbpocpdhpdapfkhal/reviews)
+- 📧 [Reaching out to the Nebul AI Team](mailto:engineering@nebul.com)
 
 ---
 
