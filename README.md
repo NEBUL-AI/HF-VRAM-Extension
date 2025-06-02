@@ -39,7 +39,7 @@ Install directly from the Chrome Web Store:
 
 1. **Download or clone this repository**
    ```bash
-   git clone https://github.com/your-repo/HF-VRAM-Extension.git
+   git clone https://github.com/NEBUL-AI/HF-VRAM-Extension.git
    ```
 
 2. **Prepare the extension**
@@ -56,11 +56,11 @@ Install directly from the Chrome Web Store:
 
 ## 🎯 Usage
 
-1. **Navigate to any model on Hugging Face** (e.g., `https://huggingface.co/microsoft/DialoGPT-medium`)
+1. **Navigate to any model on Hugging Face** (e.g., `https://huggingface.co/meta-llama/Meta-Llama-3-8B`)
 
 2. **Open the VRAM Calculator** by either:
    - Clicking the extension icon in your Chrome toolbar
-   - Clicking the **VRAM** button in the model card (if available)
+   - Clicking the **VRAM** button in the model card
 
 3. **View the results**:
    - See memory requirements for different use cases
@@ -109,8 +109,8 @@ Contributions are welcome! We're always looking to improve the HF VRAM Calculato
 
 Since this is a Beta version, your feedback is invaluable! Please help us improve by:
 
-- 🐛 [Reporting bugs](https://github.com/your-repo/HF-VRAM-Extension/issues)
-- 💡 [Suggesting features](https://github.com/your-repo/HF-VRAM-Extension/issues)
+- 🐛 [Reporting bugs](https://github.com/NEBUL-AI/HF-VRAM-Extension/issues)
+- 💡 [Suggesting features](https://github.com/NEBUL-AI/HF-VRAM-Extension/issues)
 - ⭐ Rating the extension on the Chrome Web Store
 - 📧 Reaching out to the Nebul AI Team
 
@@ -118,7 +118,7 @@ Since this is a Beta version, your feedback is invaluable! Please help us improv
 
 ## 👥 Team
 
-Created with ❤️ by the **Nebul AI Team**
+Created by the **Nebul AI Team**
 
 ---
 
@@ -132,7 +132,7 @@ This project is open-source. Please see the [LICENSE](LICENSE) file for details.
 
 - [Chrome Web Store](https://chromewebstore.google.com/detail/bioohacjdieeliinbpocpdhpdapfkhal?utm_source=item-share-cb)
 - [Hugging Face](https://huggingface.co/)
-- [Report Issues](https://github.com/your-repo/HF-VRAM-Extension/issues)
+- [Report Issues](https://github.com/NEBUL-AI/HF-VRAM-Extension/issues)
 
 ---
 
