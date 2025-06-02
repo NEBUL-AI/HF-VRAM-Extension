@@ -1,11 +1,15 @@
 # HF VRAM Calculator
 
-A Chrome extension that helps you determine the hardware requirements for running LLMs and AI models from Hugging Face.
+<div align="center">
 
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/v/bioohacjdieeliinbpocpdhpdapfkhal?style=flat-square)
 ![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/bioohacjdieeliinbpocpdhpdapfkhal?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Nebul Homepage](https://img.shields.io/badge/By-Nebul-f20?style=flat-square&labelColor=555&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjY1MCAwIDIxMCAxNzAiPjxwYXRoIGZpbGw9IiNmMjAiIGQ9Ik04MDYsMjkuNXY4NS45bC03NC4yLTc0LjNoMGMtMTcuMy0xNy4zLTQ1LjUtMTcuMy02Mi44LDAtOC43LDguNy0xMywyMC0xMywzMS40aDB2OTYuMWg1My4ydi03NC44bDc0LjgsNzQuOGg3NS4zbC01MS44LTUxLjhjMjguNy0uOCw1MS44LTI0LjMsNTEuOC01My4yaDBWMjkuNmgtNTMuMloiLz48L3N2Zz4=&logoWidth=35)](https://nebul.com)
+
+</div>
+A Chrome extension that helps you determine the hardware requirements for running LLMs and AI models from Hugging Face.
+
 
 ---
 
