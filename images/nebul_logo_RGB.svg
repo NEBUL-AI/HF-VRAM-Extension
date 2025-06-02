@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Nebul" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 859.3 170.1">
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #230023;
+      }
+
+      .st1 {
+        fill: #f20;
+      }
+    </style>
+  </defs>
+  <path id="icon" class="st1" d="M806,29.5v85.9l-74.2-74.3h0c-17.3-17.3-45.5-17.3-62.8,0-8.7,8.7-13,20-13,31.4h0v96.1h53.2v-74.8l74.8,74.8h75.3l-51.8-51.8c28.7-.8,51.8-24.3,51.8-53.2h0V29.6h-53.2Z"/>
+</svg>
